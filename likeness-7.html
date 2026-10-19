@@ -1,0 +1,2023 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>LIKENESS</title>
+<style>
+:root{--ink:#ecebe8;--dim:#8b8e94;--ui:#0e0f12;--ui2:#18191d;--ui3:#222429;--line:#26292e;--cy:#a6ecff;--red:#ff5a4a;--amber:#ffbf7a;--blue:#2f6bf0;
+--serif:Georgia,"Noto Serif","Droid Serif","Times New Roman",serif;--mono:ui-monospace,"Roboto Mono","Droid Sans Mono",Menlo,Consolas,monospace;
+--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+html,body{height:100%;background:#000;color:var(--ink);overflow:hidden;overscroll-behavior:none}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;font-size:16px;line-height:1.35;touch-action:manipulation}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+input{font:inherit;-webkit-user-select:text;user-select:text}
+#app{position:fixed;left:0;top:0;width:100%;height:100%;height:100dvh;overflow:hidden;background:#000}
+#bg{position:absolute;inset:0;width:100%;height:100%}
+#os{position:absolute;inset:0;display:flex;flex-direction:column;transition:filter .8s,opacity .8s}
+#sb{flex:none;height:calc(30px + var(--sat));padding:var(--sat) 20px 0;display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:600;letter-spacing:.02em;position:relative;z-index:3;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+#sb .r{display:flex;gap:7px;align-items:center}
+#sb svg{width:15px;height:15px;fill:currentColor}
+#bat{display:inline-flex;align-items:center;gap:4px}
+#scr{flex:1;position:relative;overflow:hidden}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;animation:scrIn .35s ease-out}
+@keyframes scrIn{from{opacity:0;transform:scale(1.03)}to{opacity:1;transform:none}}
+#fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:60}
+#cine{position:absolute;inset:0;z-index:40;display:none;background:#000;overflow:hidden;touch-action:none}
+#cine canvas{position:absolute;inset:0;width:100%;height:100%}
+#banner{position:absolute;left:10px;right:10px;top:calc(8px + var(--sat));z-index:55;pointer-events:none}
+.bn{background:rgba(32,34,40,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:18px;padding:11px 13px;display:flex;gap:11px;align-items:flex-start;box-shadow:0 8px 30px rgba(0,0,0,.6);animation:bnIn .45s cubic-bezier(.2,.9,.3,1.2);margin-bottom:6px}
+.bn.out{animation:bnOut .35s ease-in forwards}
+@keyframes bnIn{from{transform:translateY(-120%);opacity:0}to{transform:none;opacity:1}}
+@keyframes bnOut{to{transform:translateY(-120%);opacity:0}}
+.ic{flex:none;width:38px;height:38px;border-radius:10px;display:grid;place-items:center;font-weight:700;font-size:15px;color:#fff}
+.ic svg{width:60%;height:60%;fill:#fff}
+.bn .t{font-size:13px;color:#bfc2c8;display:flex;justify-content:space-between;gap:8px}
+.bn .t b{color:#fff;font-weight:600}
+.bn .m{font-size:14.5px;margin-top:1px;color:#f2f2f2}
+#thought{position:absolute;left:0;right:0;bottom:0;top:0;z-index:58;display:none;align-items:flex-end;justify-content:center;padding:0 18px calc(30px + var(--sab));background:linear-gradient(to top,rgba(0,0,0,.92) 0%,rgba(0,0,0,.75) 35%,rgba(0,0,0,0) 70%)}
+#thought.on{display:flex}
+#thought.free{pointer-events:none;background:linear-gradient(to top,rgba(0,0,0,.85),rgba(0,0,0,0) 40%)}
+#thought .tx{font-family:var(--serif);font-style:italic;font-size:19px;line-height:1.5;color:#ddd8cf;max-width:560px;width:100%;text-shadow:0 2px 12px #000;min-height:3em}
+#thought .tx .c{opacity:0;transition:opacity .25s}
+#thought .tx .c.v{opacity:1}
+#thought .go{position:absolute;bottom:calc(10px + var(--sab));left:50%;transform:translateX(-50%);font-size:11px;letter-spacing:.3em;color:#666;font-family:var(--mono);animation:pulse 1.8s infinite}
+@keyframes pulse{50%{opacity:.25}}
+/* lock */
+.lock{align-items:center;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.5)}
+.lock .clk{font-size:84px;font-weight:200;letter-spacing:-.02em;margin-top:5vh;line-height:1;font-variant-numeric:tabular-nums}
+.lock .dt{font-size:17px;font-weight:500;opacity:.9;margin-top:6px}
+.lock .nl{width:100%;flex:1;overflow-y:auto;padding:22px 10px 10px;display:flex;flex-direction:column;gap:7px;-webkit-mask:linear-gradient(to bottom,transparent,#000 18px)}
+.lock .nl .bn{animation:nIn .5s ease-out;margin:0;text-shadow:none;background:rgba(28,30,36,.78)}
+@keyframes nIn{from{opacity:0;transform:translateY(-16px) scale(.96)}to{opacity:1;transform:none}}
+.lock .nl .bn.pulse{animation:npulse 1.2s infinite;box-shadow:0 0 0 2px var(--amber)}
+@keyframes npulse{50%{box-shadow:0 0 0 2px rgba(255,191,122,.15)}}
+.lock .hint{padding:14px 0 calc(16px + var(--sab));font-size:13px;letter-spacing:.06em;opacity:.75;animation:pulse 2.4s infinite}
+.lock .bar{width:130px;height:5px;border-radius:3px;background:#fff;opacity:.8;margin-bottom:calc(8px + var(--sab))}
+.kp{align-items:center;background:rgba(6,6,8,.9)}
+.kp .lbl{margin-top:7vh;font-size:18px}
+.kp .sub{font-size:12.5px;color:#aaa;margin-top:5px;text-align:center;padding:0 30px;min-height:2.4em}
+.kp .dots{display:flex;gap:16px;margin:20px 0 26px}
+.kp .dots i{width:16px;height:16px;border-radius:50%;border:2px solid #fff;transition:background .08s,transform .12s}
+.kp .dots i.f{background:#fff;transform:scale(1.15);box-shadow:0 0 10px rgba(255,255,255,.6);animation:dotin .15s ease-out}
+@keyframes dotin{from{transform:scale(.6)}}
+.kp .dots.shake{animation:shake .45s}
+@keyframes shake{20%,60%{transform:translateX(-12px)}40%,80%{transform:translateX(12px)}}
+.kp .keys{display:grid;grid-template-columns:repeat(3,76px);gap:16px 26px}
+.kp .keys button{width:76px;height:76px;border-radius:50%;background:rgba(255,255,255,.13);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:31px;font-weight:300;line-height:1}
+.kp .keys button small{font-size:9.5px;letter-spacing:.2em;font-weight:600;margin-top:2px;opacity:.8}
+.kp .keys button{touch-action:none}
+.kp .keys button{transition:background .15s}
+.kp .keys button.ghost{background:none;font-size:15px}
+/* home */
+.home{padding:10px 18px 0}
+.wid{border-radius:22px;padding:16px 18px;background:linear-gradient(135deg,#fbf8ff,#ffeee6);color:#24212e;box-shadow:0 10px 40px rgba(180,160,255,.18);margin-top:8px}
+.wid .h{font-size:11.5px;font-weight:700;letter-spacing:.12em;color:#8a78c9;text-transform:uppercase}
+.wid .b{font-size:21px;font-weight:600;margin-top:4px}
+.wid .s{font-size:13px;color:#6c6878;margin-top:3px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px 8px;margin-top:28px}
+.app{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11.5px;color:#e9e9e9;position:relative}
+.app .ic{width:60px;height:60px;border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.5)}
+.app.off{opacity:.38}
+.app .badge{position:absolute;top:-5px;right:calc(50% - 38px);background:var(--red);color:#fff;font-size:12px;font-weight:700;min-width:21px;height:21px;border-radius:11px;display:grid;place-items:center;padding:0 5px;border:2px solid #000}
+.app.wob .ic{animation:wob 1.6s infinite}
+@keyframes wob{0%,100%{transform:none}10%{transform:rotate(-6deg)}20%{transform:rotate(6deg)}30%{transform:none}}
+.app.nope{animation:shake .4s}
+/* app chrome */
+.appv{background:var(--ui)}
+.hd{flex:none;display:flex;align-items:center;gap:6px;padding:8px 10px 10px;border-bottom:1px solid var(--line);min-height:52px}
+.hd .bk{font-size:28px;line-height:1;padding:0 10px 4px 4px;color:#7fa6ff}
+.hd .bk.hid{visibility:hidden}
+.hd .tt{flex:1;font-weight:650;font-size:17px;text-align:center;margin-right:40px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.row{display:flex;gap:12px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line)}
+.row:active{background:var(--ui2)}
+.av{flex:none;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-weight:650;font-size:18px;color:#fff}
+.row .mid{flex:1;min-width:0}
+.row .nm{font-weight:650;display:flex;justify-content:space-between;gap:8px}
+.row .nm small{font-weight:400;color:var(--dim);font-size:13px}
+.row .pv{color:var(--dim);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.row .dot{flex:none;width:10px;height:10px;border-radius:50%;background:var(--blue)}
+/* thread */
+.th{padding:14px 12px 20px;display:flex;flex-direction:column;gap:4px}
+.ts{align-self:center;font-size:11.5px;color:#777;margin:12px 0 6px}
+.bu{max-width:78%;padding:9px 13px;border-radius:19px;font-size:15.5px;line-height:1.32;animation:buIn .3s ease-out;word-wrap:break-word;white-space:pre-wrap}
+@keyframes buIn{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:none}}
+.bu.l{align-self:flex-start;background:var(--ui3);border-bottom-left-radius:6px}
+.bu.r{align-self:flex-end;background:var(--blue);color:#fff;border-bottom-right-radius:6px}
+.cap{font-size:11px;color:#7c7f86;align-self:flex-end;margin:0 6px 6px}
+.cap.l{align-self:flex-start}
+.bu.ty{display:flex;gap:4px;padding:13px 15px}
+.bu.ty i{width:7px;height:7px;border-radius:50%;background:#999;animation:tyd 1.2s infinite}
+.bu.ty i:nth-child(2){animation-delay:.15s}.bu.ty i:nth-child(3){animation-delay:.3s}
+.bu.r.ty i{background:#cfdcff}
+@keyframes tyd{0%,60%,100%{opacity:.3;transform:none}30%{opacity:1;transform:translateY(-3px)}}
+.tray{flex:none;padding:10px 10px calc(10px + var(--sab));border-top:1px solid var(--line);background:#0b0c0e;display:flex;flex-direction:column;gap:8px;min-height:62px}
+.tray .fake{border:1px solid #2c2f35;border-radius:20px;padding:9px 14px;color:#555;font-size:15px}
+.chip{border:1.5px solid #3d6fe8;color:#cfe0ff;border-radius:20px;padding:10px 15px;text-align:left;font-size:15px;animation:buIn .35s ease-out backwards;background:rgba(47,107,240,.08)}
+.chip:active{background:rgba(47,107,240,.35)}
+.chip.dim{border-color:#333;color:#666;background:none}
+/* mirror app (light) */
+.mir{background:#f7f4fb;color:#1e1b28}
+.mir .hd{border-color:#e7e2ef;background:#fff}
+.mir .hd .bk{color:#8a72e0}
+.mir .body{padding:16px}
+.mcard{background:#fff;border-radius:22px;padding:18px;margin-bottom:14px;box-shadow:0 6px 24px rgba(120,90,200,.09)}
+.mcard h4{font-size:11.5px;letter-spacing:.13em;text-transform:uppercase;color:#9a88d8;margin-bottom:10px}
+.ring{display:flex;align-items:center;gap:16px}
+.ring svg{width:92px;height:92px;flex:none}
+.ring .v{font-size:30px;font-weight:700;font-variant-numeric:tabular-nums}
+.ring .k{font-size:13px;color:#7d7889}
+.stat{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f0ecf5;font-size:14.5px}
+.stat:last-child{border:0}
+.stat b{font-variant-numeric:tabular-nums}
+.rate{padding:8px 0;border-bottom:1px solid #f0ecf5}
+.rate:last-child{border:0}
+.rate .st{color:#f5b84a;letter-spacing:2px}
+.rate .q{font-size:13px;color:#7d7889;font-style:italic}
+.chg{font-family:var(--mono);font-size:12.5px;line-height:1.6;color:#3b3748}
+.chg b{color:#8a72e0}
+.chg .ki{color:#d24b3c}
+.mbtn{display:block;width:100%;padding:15px;border-radius:16px;background:linear-gradient(135deg,#9b85f0,#f29a8c);color:#fff;font-weight:650;font-size:16px;margin-top:6px}
+.mbtn.ghost{background:#efeaf7;color:#6b5cad}
+/* notes */
+.nts{background:#14130f}
+.nts .hd{border-color:#2a2720}
+.nts .hd .bk{color:#e7b84f}
+.note{padding:18px 18px 40px;font-size:16.5px;line-height:1.55;color:#e9e3d3}
+.note h2{font-size:24px;margin-bottom:4px}
+.note .meta{font-size:12px;color:#857f6e;margin-bottom:18px}
+.note p{margin-bottom:14px}
+.note .by{color:#a6ecff;font-family:var(--mono);font-size:13.5px;border-top:1px dashed #3a3628;padding-top:14px;margin-top:18px}
+/* photos */
+.pg{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+.pg canvas,.pg .ph{width:100%;aspect-ratio:1;display:block;background:#111}
+.alb{padding:16px 14px;font-weight:650;display:flex;justify-content:space-between;border-top:1px solid var(--line);margin-top:14px}
+.alb small{color:var(--dim);font-weight:400}
+.sect{padding:16px 14px 8px;font-size:13px;color:var(--dim);letter-spacing:.04em}
+.pv1{position:absolute;inset:0;background:#000;z-index:5;display:flex;flex-direction:column;animation:scrIn .3s}
+.pv1 .stage{flex:1;display:flex;align-items:center;justify-content:center;perspective:900px;padding:16px}
+.pv1 .card{width:min(86vw,420px);aspect-ratio:1/1.12;position:relative;transform-style:preserve-3d;transition:transform .8s cubic-bezier(.3,.8,.3,1)}
+.pv1 .card.sq{aspect-ratio:1}
+.pv1 .card canvas{position:absolute;inset:0;width:100%;height:100%;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:2px;box-shadow:0 20px 60px rgba(0,0,0,.8)}
+.pv1 .card canvas.back{transform:rotateY(180deg)}
+.pv1 .card.flip{transform:rotateY(180deg)}
+.pv1 .info{padding:12px 18px calc(18px + var(--sab));font-size:13.5px;color:#aaa;text-align:center;min-height:70px}
+.pv1 .info b{color:#eee;display:block;font-size:15px;margin-bottom:3px}
+.pv1 .info .warn{color:#ff8e80}
+/* call */
+.call .top{position:absolute;top:calc(18px + var(--sat));left:0;right:0;text-align:center;z-index:2}
+.call .top .n{font-size:26px;font-weight:500}
+.call .top .s{font-size:13px;color:#9bd;letter-spacing:.06em;margin-top:3px;font-family:var(--mono)}
+.call .pip{position:absolute;right:14px;top:calc(96px + var(--sat));width:84px;height:120px;border-radius:12px;overflow:hidden;border:1px solid #333;z-index:2;background:#050505}
+.call .sub{position:absolute;left:16px;right:16px;bottom:calc(150px + var(--sab));text-align:center;font-size:18px;line-height:1.45;color:#f0f0f0;text-shadow:0 2px 8px #000,0 0 2px #000;z-index:2;min-height:3em;font-family:var(--serif)}
+.call .ch{position:absolute;left:14px;right:14px;bottom:calc(110px + var(--sab));z-index:3;display:flex;flex-direction:column;gap:8px}
+.call .ch .chip{background:rgba(0,0,0,.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-color:rgba(166,236,255,.5);color:#dff6ff;text-align:center}
+.call .btns{position:absolute;bottom:calc(26px + var(--sab));left:0;right:0;display:flex;justify-content:center;gap:70px;z-index:2}
+.call .btns button{width:68px;height:68px;border-radius:50%;display:grid;place-items:center}
+.call .btns svg{width:30px;height:30px;fill:#fff}
+.rbtn{background:#e5413a}.gbtn{background:#2fbf5b}
+.ringing .gbtn{animation:wob 1.2s infinite}
+/* scan */
+.scanbox{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:calc(40px + var(--sab));z-index:2;text-align:center;pointer-events:none}
+.scanbox .pc{font-family:var(--mono);font-size:44px;font-weight:300;letter-spacing:.05em}
+.scanbox .lb{font-family:var(--mono);font-size:12px;letter-spacing:.25em;color:#999;margin-top:4px;text-transform:uppercase}
+.scanbox .ms{font-size:15px;margin-top:14px;padding:0 30px;min-height:3em;color:#ddd}
+/* title */
+.ttl{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2;text-align:center;padding:24px}
+.ttl h1{font-family:var(--serif);font-weight:400;font-size:clamp(40px,13vw,72px);letter-spacing:.32em;margin-left:.32em;color:#f3f1ec;text-shadow:3px 0 rgba(255,60,60,.35),-3px 0 rgba(80,220,255,.35)}
+.ttl .tg{font-family:var(--mono);font-size:12px;letter-spacing:.28em;color:#8b8e94;margin-top:16px;text-transform:uppercase}
+.ttl .warn{font-size:13px;color:#777;margin-top:44px;line-height:1.8;letter-spacing:.04em}
+.ttl .begin{margin-top:36px;font-family:var(--mono);font-size:14px;letter-spacing:.4em;padding:16px 26px;border:1px solid #444;animation:pulse 2.2s infinite}
+.ttl .cont{margin-top:14px;font-family:var(--mono);font-size:12px;letter-spacing:.3em;color:#888;padding:10px}
+.ttl input{margin-top:26px;background:none;border:0;border-bottom:1px solid #555;color:#fff;font-size:26px;text-align:center;width:min(80vw,320px);padding:8px;font-family:var(--serif);outline:none;border-radius:0}
+.ttl .q{font-family:var(--serif);font-style:italic;font-size:21px;color:#ddd}
+.endc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;z-index:3;padding:30px;animation:fadeIn 3s}
+.endc .en{font-family:var(--mono);font-size:12px;letter-spacing:.35em;color:#888}
+.endc h2{font-family:var(--serif);font-weight:400;font-size:clamp(28px,9vw,46px);letter-spacing:.12em;margin:14px 0 30px}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.fade{position:absolute;inset:0;background:#000;z-index:57;pointer-events:none;opacity:0;transition:opacity 1.2s}
+.fade.on{opacity:1}
+.glitch #os,.glitch #cine{animation:gl .12s steps(2) infinite}
+@keyframes gl{0%{transform:translate(0,0) skewX(0)}25%{transform:translate(-4px,1px) skewX(-2deg)}50%{transform:translate(3px,-2px)}75%{transform:translate(-2px,2px) skewX(1.5deg)}}
+.bu.ed{animation:edp .45s infinite alternate}
+@keyframes edp{to{background:#7d63e0;box-shadow:0 0 18px rgba(169,147,245,.6)}}
+.cap.edc{color:#b5a3f0;animation:fadeIn 1.2s}
+.setp{position:absolute;inset:0;z-index:4;background:#050506;display:flex;flex-direction:column;padding:calc(18px + var(--sat)) 18px calc(18px + var(--sab));overflow-y:auto;animation:fadeIn .4s}
+.setp h3{font-family:var(--mono);font-size:12px;letter-spacing:.35em;color:#888;margin:8px 0 10px;font-weight:400}
+.srow{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid #1d1f23}
+.srow .l{flex:1}.srow .l b{display:block;font-weight:600;font-size:16px}.srow .l small{color:#80838a;font-size:12.5px;line-height:1.35;display:block;margin-top:2px}
+.sw{flex:none;width:50px;height:30px;border-radius:15px;background:#3a3c42;position:relative;transition:background .25s}
+.sw::after{content:'';position:absolute;left:3px;top:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:transform .25s;box-shadow:0 1px 3px rgba(0,0,0,.4)}
+.sw.on{background:#34c759}.sw.on::after{transform:translateX(20px)}
+.sw.dis{opacity:.35}
+.ends{margin-top:26px;font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:#6d7076;line-height:2}
+.ends b{color:#bbb;font-weight:400}
+.mir .tos{font-family:var(--serif);font-size:13.5px;line-height:1.6;color:#3b3748;padding:18px 18px 60px}
+.mir .tos p{margin-bottom:12px}
+.mir .tos .me{color:#d24b3c;font-family:var(--mono);font-size:12px;margin:18px 0}
+.plan{border-radius:20px;padding:18px;background:#fff;margin-bottom:14px;box-shadow:0 6px 24px rgba(120,90,200,.09);position:relative}
+.plan.rec{box-shadow:0 0 0 2px #9b85f0,0 10px 30px rgba(120,90,200,.2)}
+.plan .tag{position:absolute;top:-10px;right:14px;background:#9b85f0;color:#fff;font-size:11px;font-weight:700;letter-spacing:.08em;padding:4px 10px;border-radius:10px}
+.plan h5{font-size:19px}.plan .pr{font-size:15px;color:#8a72e0;font-weight:650;margin:2px 0 8px}
+.plan li{font-size:14px;color:#55506a;margin:4px 0 4px 18px}
+.msw{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #f0ecf5}
+.msw:last-child{border:0}
+.msw .l{flex:1;font-size:15px}.msw .l small{display:block;font-size:12px;color:#9a8fb5;min-height:1em}
+.rev{padding:10px 0;border-bottom:1px solid #f0ecf5;font-size:14px}.rev:last-child{border:0}
+.rev .st{color:#f5b84a;letter-spacing:2px;font-size:13px}.rev i{color:#9a95a6;font-size:12.5px}
+.rev.gone{color:#b9b4c6;font-style:italic}
+.lnk{display:block;width:100%;text-align:left;padding:13px 0;color:#7a63d8;font-weight:600;border-bottom:1px solid #f0ecf5;font-size:15px}
+#app.big #thought .tx{font-size:23px}#app.big .bu{font-size:18px}#app.big .chip{font-size:17.5px}#app.big .note{font-size:19px}
+#app.big .call .sub{font-size:21px}#app.big .row .pv{font-size:16px}#app.big .bn .m{font-size:16.5px}#app.big .stat,#app.big .rate,#app.big .rev,#app.big .msw .l{font-size:16.5px}#app.big .mir .tos{font-size:16px}
+#cine video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1);filter:grayscale(1) brightness(1.5) contrast(1.2) sepia(.85) hue-rotate(-35deg) saturate(2);opacity:.95}
+#cine .rec{position:absolute;top:calc(16px + var(--sat));left:16px;z-index:3;font-family:var(--mono);font-size:11px;letter-spacing:.25em;color:#ff5a4a;animation:pulse 1.4s infinite}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div id="app">
+<canvas id="bg"></canvas>
+<div id="os">
+ <div id="sb"><span id="clock">3:12</span><span class="r"><svg viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></svg><span id="bat"><span id="batn">92%</span><svg viewBox="0 0 26 14" style="width:24px"><rect x="1" y="1" width="21" height="12" rx="3" fill="none" stroke="currentColor" stroke-width="1.6"/><rect id="batf" x="3" y="3" width="16" height="8" rx="1.5"/><rect x="23" y="4.5" width="2" height="5" rx="1"/></svg></span></span></div>
+ <div id="scr"></div>
+</div>
+<div id="cine"></div>
+<div id="banner"></div>
+<div id="thought"><div class="tx"></div><div class="go">TAP</div></div>
+<div class="fade" id="fade"></div>
+<canvas id="fx"></canvas>
+</div>
+<script>
+'use strict';
+/* ================= AUDIO: everything synthesized, nothing loaded ================= */
+const A = (() => {
+  const AC = window.AudioContext || window.webkitAudioContext;
+  let ctx = null, out, verbIn, noiseB, brownB, shB;
+  const L = {}; // running layers
+  const api = { speaking: false, mouth: 0, ttsOK: true, haptics: !!navigator.vibrate, voiceOn: true };
+
+  function mkNoise(sec, kind) {
+    const n = Math.floor(ctx.sampleRate * sec), b = ctx.createBuffer(1, n, ctx.sampleRate), d = b.getChannelData(0);
+    let last = 0, hold = 0, hv = 0;
+    for (let i = 0; i < n; i++) {
+      const w = Math.random() * 2 - 1;
+      if (kind === 'brown') { last = (last + 0.02 * w) / 1.02; d[i] = last * 3.5; }
+      else if (kind === 'sh') { if (hold-- <= 0) { hold = 20 + Math.random() * 600; hv = Math.random() * 2 - 1; } d[i] = hv; }
+      else d[i] = w;
+    }
+    return b;
+  }
+  function impulse(sec, decay) {
+    const n = Math.floor(ctx.sampleRate * sec), b = ctx.createBuffer(2, n, ctx.sampleRate);
+    for (let c = 0; c < 2; c++) { const d = b.getChannelData(c); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, decay); }
+    return b;
+  }
+  api.init = () => {
+    if (ctx) { api.resume(); return; }
+    if (!AC) return;
+    try { ctx = new AC(); } catch (e) { return; }
+    const comp = ctx.createDynamicsCompressor();
+    comp.threshold.value = -14; comp.ratio.value = 4;
+    out = ctx.createGain(); out.gain.value = 0.85; out.connect(comp); comp.connect(ctx.destination);
+    const cv = ctx.createConvolver(); cv.buffer = impulse(3.4, 2.4);
+    verbIn = ctx.createGain(); const vr = ctx.createGain(); vr.gain.value = 0.55;
+    verbIn.connect(cv); cv.connect(vr); vr.connect(out);
+    noiseB = mkNoise(3, 'w'); brownB = mkNoise(6, 'brown'); shB = mkNoise(2, 'sh');
+    const s = ctx.createBufferSource(); s.buffer = ctx.createBuffer(1, 1, 22050); s.connect(out); s.start(0);
+    api.resume();
+  };
+  api.resume = () => { if (ctx && ctx.state !== 'running') ctx.resume().catch(() => {}); };
+  document.addEventListener('visibilitychange', () => {
+    if (!ctx) return;
+    if (document.hidden) { ctx.suspend().catch(() => {}); if (window.speechSynthesis) speechSynthesis.pause(); }
+    else { ctx.resume().catch(() => {}); if (window.speechSynthesis) speechSynthesis.resume(); }
+  });
+  const T = () => ctx.currentTime;
+  function g(v) { const n = ctx.createGain(); n.gain.value = v; return n; }
+  function send(node, wet, dry = 1) { if (dry) { const d = g(dry); node.connect(d); d.connect(out); } if (wet) { const w = g(wet); node.connect(w); w.connect(verbIn); } }
+  function tone(f, dur, o = {}) {
+    if (!ctx) return;
+    const t = T() + (o.at || 0), os = ctx.createOscillator(), e = g(0);
+    os.type = o.type || 'sine'; os.frequency.setValueAtTime(f, t);
+    if (o.to) os.frequency.exponentialRampToValueAtTime(o.to, t + dur);
+    if (o.det) os.detune.value = o.det;
+    const v = o.vol == null ? 0.2 : o.vol, a = o.a || 0.005;
+    e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(v, t + a); e.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    let last = e;
+    if (o.lp) { const f2 = ctx.createBiquadFilter(); f2.type = 'lowpass'; f2.frequency.value = o.lp; e.connect(f2); last = f2; }
+    os.connect(e); send(last, o.rev || 0, o.dry == null ? 1 : o.dry);
+    os.start(t); os.stop(t + dur + 0.05);
+  }
+  function burst(dur, o = {}) {
+    if (!ctx) return;
+    const t = T() + (o.at || 0), s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), e = g(0);
+    s.buffer = o.buf || noiseB; f.type = o.ft || 'lowpass'; f.frequency.value = o.f || 1000; f.Q.value = o.q || 0.7;
+    if (o.fto) f.frequency.exponentialRampToValueAtTime(o.fto, t + dur);
+    const v = o.vol == null ? 0.2 : o.vol;
+    e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(v, t + (o.a || 0.003)); e.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    s.connect(f); f.connect(e); send(e, o.rev || 0);
+    s.start(t, Math.random() * 1.5); s.stop(t + dur + 0.05);
+  }
+  api.vib = (p) => { if (api.haptics) try { navigator.vibrate(p); } catch (e) {} };
+
+  /* ---- UI sounds ---- */
+  api.tap = () => burst(0.02, { ft: 'highpass', f: 2500, vol: 0.07 });
+  api.key = () => { tone(1200, 0.05, { vol: 0.05 }); burst(0.015, { ft: 'highpass', f: 3000, vol: 0.05 }); };
+  api.type = () => burst(0.025, { ft: 'bandpass', f: 2200 + Math.random() * 800, q: 2, vol: 0.06 });
+  api.notify = (bad = 0) => {
+    if (!bad) { tone(1318.5, 0.5, { vol: 0.12, rev: 0.25 }); tone(1975.5, 0.7, { vol: 0.1, at: 0.09, rev: 0.3 }); }
+    else { const k = 1 - bad * 0.06; tone(1318.5 * k, 0.9, { vol: 0.12, rev: 0.5, det: -30 * bad }); tone(1975.5 * k * 0.97, 1.3, { vol: 0.09, at: 0.16 + bad * 0.05, rev: 0.6, det: -50 * bad }); }
+    api.vib([20, 60, 20]);
+  };
+  api.err = () => { tone(110, 0.12, { type: 'square', vol: 0.06, lp: 600 }); tone(98, 0.16, { type: 'square', vol: 0.06, lp: 600, at: 0.14 }); api.vib([60, 40, 60]); };
+  api.unlock = () => { tone(700, 0.25, { to: 1400, vol: 0.08, rev: 0.3 }); tone(2100, 0.6, { vol: 0.04, at: 0.12, rev: 0.5 }); };
+  api.open = () => burst(0.18, { ft: 'bandpass', f: 600, fto: 2400, q: 1.2, vol: 0.06 });
+  api.sent = () => tone(900, 0.18, { to: 1500, vol: 0.06 });
+  api.recv = () => { tone(1046, 0.3, { vol: 0.08, rev: 0.2 }); api.vib(25); };
+
+  /* ---- atmosphere ---- */
+  api.room = (on, v = 0.05) => {
+    if (!ctx) return;
+    if (on && !L.room) {
+      const s = ctx.createBufferSource(); s.buffer = brownB; s.loop = true;
+      const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 420; const e = g(0);
+      s.connect(f); f.connect(e); e.connect(out); s.start(); e.gain.linearRampToValueAtTime(v, T() + 3);
+      L.room = { s, e };
+    } else if (!on && L.room) { const r = L.room; r.e.gain.linearRampToValueAtTime(0, T() + 2); setTimeout(() => r.s.stop(), 2200); L.room = null; }
+  };
+  api.fridge = (on) => {
+    if (!ctx) return;
+    if (on && !L.fr) {
+      const e = g(0), oss = [];
+      [[59.7, 0.05], [119.4, 0.03], [179.1, 0.012], [238.8, 0.006]].forEach(([f, v]) => { const o = ctx.createOscillator(); o.frequency.value = f; const gg = g(v); o.connect(gg); gg.connect(e); o.start(); oss.push(o); });
+      const lfo = ctx.createOscillator(), lg = g(0.25); lfo.frequency.value = 0.13; lfo.connect(lg); lg.connect(e.gain); lfo.start(); oss.push(lfo);
+      e.connect(out); e.gain.linearRampToValueAtTime(0.6, T() + 2); L.fr = { e, oss };
+    } else if (!on && L.fr) { const r = L.fr; r.e.gain.cancelScheduledValues(T()); r.e.gain.setValueAtTime(r.e.gain.value, T()); r.e.gain.linearRampToValueAtTime(0, T() + 0.08); setTimeout(() => r.oss.forEach(o => o.stop()), 200); L.fr = null; }
+  };
+  api.drone = (lvl, tension = 0, sec = 4) => {
+    if (!ctx) return;
+    if (!L.dr) {
+      const e = g(0), f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 200; f.Q.value = 3;
+      const mk = (fr, type, v, dest) => { const o = ctx.createOscillator(); o.type = type; o.frequency.value = fr; const gg = g(v); o.connect(gg); gg.connect(dest); o.start(); return { o, gg }; };
+      const a = mk(55, 'sawtooth', 0.14, f), b = mk(55.35, 'sawtooth', 0.14, f), c = mk(110.2, 'sine', 0.05, f);
+      const dis = mk(58.27, 'sine', 0, e), hi = mk(1661, 'sine', 0, e);
+      const lfo = ctx.createOscillator(), lg = g(60); lfo.frequency.value = 0.07; lfo.connect(lg); lg.connect(f.frequency); lfo.start();
+      f.connect(e); send(e, 0.6, 1);
+      L.dr = { e, f, dis, hi, oss: [a.o, b.o, c.o, dis.o, hi.o, lfo] };
+    }
+    const d = L.dr, t = T();
+    d.e.gain.cancelScheduledValues(t); d.e.gain.setValueAtTime(d.e.gain.value, t); d.e.gain.linearRampToValueAtTime(lvl, t + sec);
+    d.f.frequency.cancelScheduledValues(t); d.f.frequency.setValueAtTime(d.f.frequency.value, t); d.f.frequency.linearRampToValueAtTime(160 + tension * 700, t + sec);
+    d.dis.gg.gain.linearRampToValueAtTime(tension * 0.16, t + sec);
+    d.hi.gg.gain.linearRampToValueAtTime(tension > 0.6 ? (tension - 0.6) * 0.012 : 0, t + sec);
+  };
+  api.silence = (sec = 0.05) => { // everything ambient drops out (used for shocks)
+    api.drone(0, 0, sec); api.fridge(false); api.room(false); api.heart(0);
+  };
+  let hbT = null, hbBpm = 0;
+  api.heart = (bpm) => {
+    hbBpm = bpm; if (hbT || !bpm) return;
+    const beat = () => {
+      if (!hbBpm || !ctx) { hbT = null; return; }
+      tone(68, 0.22, { to: 36, vol: 0.5, lp: 160 }); tone(60, 0.2, { to: 34, vol: 0.32, lp: 140, at: 0.24 });
+      api.vib([35, 190, 25]);
+      hbT = setTimeout(beat, 60000 / hbBpm);
+    };
+    beat();
+  };
+  api.sting = (lvl = 1) => {
+    if (!ctx) return;
+    [73.4, 77.8, 110, 116.5, 155.6, 233].forEach((f, i) => {
+      const t = T(), o = ctx.createOscillator(), e = g(0), fl = ctx.createBiquadFilter();
+      o.type = i % 2 ? 'sawtooth' : 'triangle'; o.frequency.value = f; o.detune.value = (Math.random() - 0.5) * 30;
+      fl.type = 'lowpass'; fl.frequency.value = 500 + lvl * 700;
+      e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(0.07 * lvl, t + 0.6); e.gain.exponentialRampToValueAtTime(0.0001, t + 4.5);
+      o.connect(fl); fl.connect(e); send(e, 0.9, 0.7); o.start(t); o.stop(t + 4.6);
+    });
+    tone(36, 2.5, { vol: 0.4 * lvl, a: 0.02 });
+  };
+  api.glitch = (dur = 0.3, vol = 0.18) => {
+    burst(dur, { buf: shB, ft: 'bandpass', f: 400 + Math.random() * 3000, q: 0.8, vol });
+    burst(dur * 0.6, { buf: shB, ft: 'highpass', f: 2000, vol: vol * 0.5, at: dur * 0.3 });
+  };
+  api.creak = () => {
+    if (!ctx) return;
+    const t = T(), o = ctx.createOscillator(), f = ctx.createBiquadFilter(), e = g(0);
+    o.type = 'sawtooth'; const n = 40, c = new Float32Array(n);
+    let v = 95; for (let i = 0; i < n; i++) { v += (Math.random() - 0.45) * 14; c[i] = Math.max(50, v); }
+    o.frequency.setValueCurveAtTime(c, t, 0.9);
+    f.type = 'bandpass'; f.frequency.value = 700; f.Q.value = 6;
+    e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(0.35, t + 0.1); e.gain.linearRampToValueAtTime(0.25, t + 0.6); e.gain.linearRampToValueAtTime(0, t + 0.9);
+    o.connect(f); f.connect(e); send(e, 0.5); o.start(t); o.stop(t + 1);
+  };
+  api.step = (v = 1) => { burst(0.14, { f: 170, vol: 0.45 * v, rev: 0.15 }); burst(0.03, { ft: 'bandpass', f: 900, q: 1, vol: 0.05 * v, at: 0.02 }); };
+  api.door = () => { api.creak(); setTimeout(api.creak, 450); burst(0.5, { f: 120, vol: 0.4, at: 1.1, rev: 0.4 }); };
+  api.whoosh = () => burst(0.9, { ft: 'bandpass', f: 300, fto: 3000, q: 0.6, vol: 0.1, a: 0.3 });
+
+  /* ---- ringtone: yours. Later, slightly wrong. ---- */
+  api.ring = (wrong = 0) => {
+    if (!ctx) return () => {};
+    let on = true, i = 0;
+    const notes = [659.3, 830.6, 987.8, 830.6, 659.3, 987.8, 1318.5, 987.8];
+    const step = () => {
+      if (!on) return;
+      const f = notes[i % notes.length] * (1 - wrong * 0.015 * (i % 3));
+      tone(f, 0.45, { vol: 0.13, rev: 0.25 }); tone(f * 4, 0.12, { vol: 0.03 });
+      if (i % 8 === 0) api.vib([400, 200, 400]);
+      i++; setTimeout(step, i % 8 === 0 ? 900 + wrong * 300 : 150 + wrong * 40);
+    };
+    step();
+    return () => { on = false; api.vib(0); };
+  };
+
+  /* ---- the voice: speech synthesis with a second murmur underneath ---- */
+  let voice = null;
+  function pickVoice() {
+    if (!window.speechSynthesis) return;
+    const vs = speechSynthesis.getVoices() || [];
+    const en = vs.filter(v => /^en/i.test(v.lang));
+    voice = en.find(v => v.localService && /US|United States/i.test(v.lang + v.name)) || en.find(v => v.localService) || en[0] || vs[0] || null;
+  }
+  if (window.speechSynthesis) { pickVoice(); try { speechSynthesis.addEventListener('voiceschanged', pickVoice); } catch (e) { speechSynthesis.onvoiceschanged = pickVoice; } }
+  api.warmTTS = () => { try { if (!window.speechSynthesis) { api.ttsOK = false; return; } const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); } catch (e) { api.ttsOK = false; } };
+
+  function murmur(dur, vol) {
+    if (!ctx) return;
+    const t0 = T(), o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = 102;
+    const vib = ctx.createOscillator(), vg = g(3); vib.frequency.value = 5.5; vib.connect(vg); vg.connect(o.frequency); vib.start(t0);
+    const e = g(0), F = [[700, 1200], [300, 2300], [500, 1000], [400, 2000], [600, 1700], [350, 900]];
+    const b1 = ctx.createBiquadFilter(), b2 = ctx.createBiquadFilter(); b1.type = b2.type = 'bandpass'; b1.Q.value = 9; b2.Q.value = 12;
+    o.connect(b1); o.connect(b2); b1.connect(e); b2.connect(e);
+    let t = t0;
+    while (t < t0 + dur) {
+      const syl = 0.11 + Math.random() * 0.14, f = F[Math.floor(Math.random() * F.length)];
+      b1.frequency.setValueAtTime(f[0], t); b2.frequency.setValueAtTime(f[1], t);
+      e.gain.setValueAtTime(0.0001, t); e.gain.linearRampToValueAtTime(vol, t + syl * 0.3); e.gain.linearRampToValueAtTime(vol * 0.2, t + syl);
+      t += syl + (Math.random() < 0.15 ? 0.18 : 0.02);
+    }
+    e.gain.linearRampToValueAtTime(0, t + 0.1);
+    send(e, 0.8, 0.6); o.start(t0); o.stop(t + 0.2); vib.stop(t + 0.2);
+  }
+  api.speak = (text, o = {}) => new Promise(res => {
+    const words = text.split(/\s+/).length, est = 900 + words * 330;
+    let done = false, started = false;
+    const fin = () => { if (done) return; done = true; api.speaking = false; res(); };
+    api.speaking = true;
+    if (!api.voiceOn) { setTimeout(fin, est + 600); return; }
+    murmur(est / 1000, api.ttsOK ? (o.murmur ?? 0.025) : 0.09);
+    if (!api.ttsOK || !window.speechSynthesis || o.mute) { setTimeout(fin, est + 400); return; }
+    try {
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text.replace(/[—…]/g, ', '));
+      if (voice) { u.voice = voice; u.lang = voice.lang; } else u.lang = 'en-US';
+      u.rate = o.rate || 0.92; u.pitch = o.pitch || 0.82; u.volume = o.vol == null ? 1 : o.vol;
+      u.onstart = () => { started = true; };
+      u.onend = () => setTimeout(fin, 250);
+      u.onerror = () => setTimeout(fin, Math.max(300, est - 500));
+      u.onboundary = () => { api.mouth = 1; };
+      speechSynthesis.speak(u);
+      setTimeout(() => { if (!started && !done) { api.ttsOK = false; } }, 3000);
+      setTimeout(() => { if (!started) fin(); }, est + 1500);
+      setTimeout(fin, est * 2.2 + 4000);
+    } catch (e) { api.ttsOK = false; setTimeout(fin, est); }
+  });
+  api.check = () => { api.drone(0.2, 0.1, 1.5); setTimeout(() => api.heart(60), 300); setTimeout(() => { api.heart(0); api.drone(0, 0, 2); }, 3200); tone(220, 1.6, { vol: 0.12, rev: 0.5, a: 0.3 }); tone(277, 1.6, { vol: 0.08, rev: 0.5, a: 0.3, at: 0.2 }); };
+  api.hush = () => { try { window.speechSynthesis && speechSynthesis.cancel(); } catch (e) {} api.speaking = false; };
+  return api;
+})();
+
+/* ================= GFX 1: overlay grain/glitch + the face ================= */
+const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+const sstep = (a, b, v) => { const t = clamp((v - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
+const rnd = (a = 1, b) => b == null ? Math.random() * a : a + Math.random() * (b - a);
+function fitCanvas(c, cap = 2) {
+  const d = Math.min(window.devicePixelRatio || 1, cap), r = c.getBoundingClientRect();
+  const w = Math.max(1, Math.round(r.width * d)), h = Math.max(1, Math.round(r.height * d));
+  if (c.width !== w || c.height !== h) { c.width = w; c.height = h; }
+  return d;
+}
+
+const FX = (() => {
+  const c = document.getElementById('fx'), x = c.getContext('2d');
+  const tile = document.createElement('canvas'); tile.width = tile.height = 128;
+  { const t = tile.getContext('2d'), im = t.createImageData(128, 128);
+    for (let i = 0; i < im.data.length; i += 4) { const v = Math.random() * 255; im.data[i] = im.data[i + 1] = im.data[i + 2] = v; im.data[i + 3] = 255; }
+    t.putImageData(im, 0, 0); }
+  let pat = null, W = 0, H = 0;
+  const st = { calm: false, grain: 0.06, vig: 0.5, red: 0, glUntil: 0, glAmt: 0, flick: 0, dark: 0 };
+  function size() { W = c.width = Math.ceil(innerWidth / 2); H = c.height = Math.ceil(innerHeight / 2); pat = x.createPattern(tile, 'repeat'); }
+  size(); addEventListener('resize', size);
+  const app = document.getElementById('app');
+  function loop(now) {
+    x.clearRect(0, 0, W, H);
+    if (st.dark > 0) { x.fillStyle = `rgba(0,0,0,${st.dark})`; x.fillRect(0, 0, W, H); }
+    if (st.red > 0) { x.fillStyle = `rgba(120,0,0,${st.red})`; x.fillRect(0, 0, W, H); }
+    x.save(); x.globalAlpha = st.grain; x.globalCompositeOperation = 'overlay';
+    x.translate(-rnd(128), -rnd(128)); x.fillStyle = pat; x.fillRect(0, 0, W + 128, H + 128); x.restore();
+    const gr = x.createRadialGradient(W / 2, H * 0.45, Math.min(W, H) * 0.25, W / 2, H / 2, Math.max(W, H) * 0.75);
+    gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(1, `rgba(0,0,0,${st.vig})`);
+    x.fillStyle = gr; x.fillRect(0, 0, W, H);
+    if (st.flick && !st.calm && Math.random() < st.flick) { x.fillStyle = `rgba(0,0,0,${rnd(0.2, 0.7)})`; x.fillRect(0, 0, W, H); }
+    if (now < st.glUntil && !st.calm) {
+      const n = 2 + Math.floor(st.glAmt * 8);
+      for (let i = 0; i < n; i++) {
+        const y = rnd(H), h = rnd(1, 4 + st.glAmt * 26);
+        x.fillStyle = ['rgba(255,40,80,.35)', 'rgba(60,230,255,.35)', 'rgba(255,255,255,.25)', 'rgba(0,0,0,.8)'][i % 4];
+        x.fillRect(rnd(-20, W * 0.3), y, rnd(W * 0.4, W * 1.2), h);
+      }
+      app.classList.add('glitch');
+    } else app.classList.remove('glitch');
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+  st.glitch = (ms = 300, amt = 0.6, snd = true) => { st.glUntil = performance.now() + ms; st.glAmt = amt; if (snd) A.glitch(ms / 1000, 0.08 + amt * 0.16); };
+  return st;
+})();
+
+/* ---------- The face: a depth-scanned point mesh, built from math ---------- */
+const FaceModel = (() => {
+  const R = 92, C = 78, pts = [];
+  const Gs = (dx, sx, dy, sy) => Math.exp(-(dx * dx) / (sx * sx) - (dy * dy) / (sy * sy));
+  function depth(x, y) {
+    const w = 0.8 - 0.3 * Math.pow(clamp((-y - 0.15) / 1.0, 0, 1), 1.4);
+    const ex = x / w, ey = y > 0 ? y / 1.12 : y / 1.2;
+    const e = 1 - ex * ex - ey * ey; if (e < 0) return null;
+    const ax = Math.abs(x);
+    let z = 0.62 * Math.sqrt(e);
+    z += 0.19 * Math.exp(-(x * x) / 0.005) * sstep(-0.22, 0.28, y) * (1 - sstep(0.26, 0.42, y));
+    z += 0.09 * Gs(x, 0.11, y + 0.16, 0.08);
+    z -= 0.05 * Gs(ax - 0.09, 0.045, y + 0.2, 0.04);
+    z -= 0.12 * Gs(ax - 0.3, 0.15, y - 0.2, 0.08);
+    z += 0.04 * Gs(ax - 0.3, 0.07, y - 0.2, 0.045);
+    z += 0.055 * Gs(ax - 0.3, 0.21, y - 0.37, 0.05);
+    z += 0.05 * Gs(ax - 0.45, 0.16, y + 0.06, 0.12);
+    z += 0.035 * Gs(x, 0.2, y + 0.42, 0.035);
+    z += 0.042 * Gs(x, 0.17, y + 0.535, 0.04);
+    z -= 0.03 * Gs(x, 0.2, y + 0.66, 0.04);
+    z += 0.06 * Gs(x, 0.2, y + 0.93, 0.12);
+    return { z, e };
+  }
+  for (let r = 0; r < R; r++) {
+    const y = 1.25 - (r / (R - 1)) * 2.55;
+    for (let c = 0; c < C; c++) {
+      const x = -1 + (c / (C - 1)) * 2, d = depth(x, y); if (!d) continue;
+      const dx = (depth(x + 0.01, y) || d).z - d.z, dy = (depth(x, y + 0.01) || d).z - d.z;
+      const nx = -dx / 0.01, ny = -dy / 0.01, nl = Math.hypot(nx, ny, 1);
+      const lam = Math.pow(clamp((nx * -0.6 + ny * 0.62 + 0.55) / nl / 0.95, 0, 1), 1.5);
+      pts.push({ x, y, z: d.z, e: d.e, r, c, lam, ph: Math.random() * 6.28 });
+    }
+  }
+  return { pts, R };
+})();
+
+function makeFace(canvas, opt = {}) {
+  const x = canvas.getContext('2d');
+  const p = Object.assign({ mode: 'twin', smile: 0.4, yaw: 0, sway: 0.18, scale: 0.36, cy: 0.42, cx: 0.5, broken: 0, dissolve: 0, alpha: 1, scan: 0, double: 0, gaze: 1, bg: true, tint: null, mouth: null }, opt);
+  let raf = 0, t0 = performance.now(), blinkAt = 2500, blinkT = -1, dpr = 1, mo = 0;
+  function frame(now) {
+    raf = requestAnimationFrame(frame);
+    dpr = fitCanvas(canvas, 2);
+    const W = canvas.width, H = canvas.height, t = (now - t0) / 1000;
+    x.globalCompositeOperation = 'source-over';
+    if (p.bg) {
+      const g = x.createRadialGradient(W * 0.5, H * 0.4, 0, W * 0.5, H * 0.45, Math.max(W, H) * 0.8);
+      g.addColorStop(0, p.mode === 'scan' ? '#140605' : '#06111a'); g.addColorStop(1, '#000');
+      x.fillStyle = g; x.fillRect(0, 0, W, H);
+      if (p.mode !== 'scan') for (let i = 0; i < 14; i++) { // drifting dust motes
+        const px = (Math.sin(i * 91.7 + t * 0.03 * (i % 3 + 1)) * 0.5 + 0.5) * W, py = ((i * 0.137 + t * 0.008 * (1 + i % 4)) % 1) * H;
+        x.fillStyle = `rgba(160,220,255,${0.03 + 0.04 * Math.sin(t + i)})`; x.beginPath(); x.arc(px, py, (2 + i % 5) * dpr * 3, 0, 6.28); x.fill();
+      }
+    } else x.clearRect(0, 0, W, H);
+    // mouth: speech drives it
+    let target = 0;
+    if (p.mouth != null) target = p.mouth;
+    else if (A.speaking) { target = 0.25 + 0.55 * Math.abs(Math.sin(t * 11.3) * Math.sin(t * 4.1 + 1)); if (A.mouth > 0.5) target = 0.9; }
+    A.mouth *= 0.85; mo += (target - mo) * 0.35;
+    // blink
+    if (now - t0 > blinkAt && blinkT < 0) { blinkT = now; }
+    let blink = 0; if (blinkT > 0) { const k = (now - blinkT) / 160; blink = k < 1 ? Math.sin(k * Math.PI) : 0; if (k >= 1) { blinkT = -1; blinkAt = now - t0 + rnd(2200, 6000); } }
+    const yaw = p.yaw + Math.sin(t * 0.37) * p.sway + Math.sin(t * 0.91) * p.sway * 0.25;
+    const pitch = Math.sin(t * 0.29) * p.sway * 0.35;
+    const S = Math.min(W, H * 0.62) * p.scale * 1.15, CX = W * p.cx, CY = H * p.cy;
+    const copies = p.double > 0 ? 2 : 1;
+    for (let k = 0; k < copies; k++) {
+      const off = k ? p.double * S * 0.12 * (1 + 0.3 * Math.sin(t * 2.1)) : 0;
+      const col = p.tint || (p.mode === 'scan' ? [255, 120, 100] : [195, 240, 255]);
+      const cc = copies > 1 ? (k ? [255, 70, 90] : [90, 230, 255]) : col;
+      if (copies > 1) x.globalCompositeOperation = 'lighter';
+      drawMesh(x, t, yaw, pitch, S, CX + (k ? off : -off * 0.3), CY, cc, blink, k);
+    }
+    if (p.scan > 0) { // scanning bar
+      const sy = CY - S * 1.4 + ((t * 0.55) % 1) * S * 2.9;
+      const g2 = x.createLinearGradient(0, sy - 30 * dpr, 0, sy + 30 * dpr);
+      g2.addColorStop(0, 'rgba(255,110,90,0)'); g2.addColorStop(0.5, `rgba(255,140,110,${0.35 * p.scan})`); g2.addColorStop(1, 'rgba(255,110,90,0)');
+      x.globalCompositeOperation = 'lighter'; x.fillStyle = g2; x.fillRect(0, sy - 30 * dpr, W, 60 * dpr);
+      x.globalCompositeOperation = 'source-over';
+      x.strokeStyle = `rgba(255,140,110,${0.5 * p.scan})`; x.lineWidth = 1.5 * dpr; const b = S * 1.25, L2 = 26 * dpr;
+      [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([sx, sy2]) => { const bx = CX + sx * b * 0.8, by = CY + sy2 * b * 1.05; x.beginPath(); x.moveTo(bx, by - sy2 * L2); x.lineTo(bx, by); x.lineTo(bx - sx * L2, by); x.stroke(); });
+    }
+    x.globalCompositeOperation = 'source-over';
+  }
+  function drawMesh(x, t, yaw, pitch, S, CX, CY, col, blink, k) {
+    const cy = Math.cos(yaw), sy = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch);
+    const pts = FaceModel.pts, m = mo, sm = p.smile, br = p.broken, ds = p.dissolve;
+    const sz = Math.max(1, dpr * 1.35);
+    let lastR = -1, rowShift = 0, rowDrop = false;
+    x.lineWidth = dpr * 0.6;
+    const line = [];
+    x.fillStyle = `rgb(${col[0]},${col[1]},${col[2]})`;
+    const la = 0.13 * p.alpha * clamp(1 - ds * 4, 0, 1);
+    const flush = () => { if (line.length > 3 && la > 0.005) { x.globalAlpha = 1; x.strokeStyle = `rgba(${col[0]},${col[1]},${col[2]},${la})`; x.beginPath(); x.moveTo(line[0], line[1]); for (let i = 2; i < line.length; i += 2) x.lineTo(line[i], line[i + 1]); x.stroke(); } line.length = 0; };
+    for (let i = 0; i < pts.length; i++) {
+      const q = pts[i];
+      if (q.r !== lastR) { flush(); lastR = q.r; rowShift = 0; rowDrop = false;
+        if (br > 0) { const h = Math.sin(q.r * 12.9898 + Math.floor(t * 9) * 78.233) * 43758.5; const fr = h - Math.floor(h);
+          if (fr < br * 0.35) rowShift = (fr - 0.1) * S * 0.8 * br; if (fr > 1 - br * 0.25) rowDrop = true; } }
+      if (rowDrop) continue;
+      let X = q.x, Y = q.y, Z = q.z;
+      const ax = Math.abs(X);
+      const yM = -0.475 + sm * 0.055 * Math.min(1, (X / 0.22) * (X / 0.22)) - sm * 0.01;
+      if (ax < 0.25 - m * 0.03 && Y < yM + 0.012 && Y > yM - m * 0.075 * (1 - (ax / 0.25) ** 2)) continue;
+      if (Y < yM) Y -= m * 0.065 * (1 - sstep(0.28, 0.78, ax));
+      if (sm > 0) { Y += sm * 0.03 * Math.exp(-((ax - 0.42) ** 2) / 0.01 - ((Y + 0.25) ** 2) / 0.02); }
+      if (blink > 0 && Math.exp(-((ax - 0.3) ** 2) / 0.012 - ((Y - 0.2) ** 2) / 0.003) > 0.4) { Y -= blink * 0.02; Z += blink * 0.03; }
+      if (ds > 0) { const a2 = q.ph + t * 0.6; const amt = ds * ds * (0.6 + q.e); X += Math.cos(a2) * amt * 1.6 + X * ds * 0.8; Y += Math.sin(a2 * 1.3) * amt * 1.6 - ds * 0.5; Z += ds; }
+      if (br > 0) { X += (Math.random() - 0.5) * 0.02 * br; Y += (Math.random() - 0.5) * 0.02 * br; }
+      const Xr = X * cy + Z * sy, Zr = -X * sy + Z * cy;
+      const Yr = Y * cp - Zr * sp, Zf = Y * sp + Zr * cp;
+      const persp = 1 / (1 - Zf * 0.22);
+      const px = CX + Xr * S * persp + rowShift, py = CY - Yr * S * persp;
+      const shim = 0.85 + 0.15 * Math.sin(q.ph + t * 2.2);
+      let b = (0.1 + 0.9 * q.lam) * clamp(0.3 + q.z * 1.25, 0, 1.15) * sstep(0, 0.12, q.e) * shim * p.alpha * (1 - ds * 0.6);
+      if (ax < 0.23 && Math.abs(Y - yM) < 0.02) b *= 0.25;
+      if (Math.exp(-((ax - 0.3) ** 2) / 0.012 - ((Y - 0.2) ** 2) / 0.004) > 0.5) b *= 0.35;
+      if (Zr < -0.05) b *= 0.3;
+      if (p.scan > 0) { const sb = CY - S * 1.4 + ((t * 0.55) % 1) * S * 2.9; b += Math.max(0, 1 - Math.abs(py - sb) / (S * 0.12)) * 0.6 * p.scan; }
+      b = Math.pow(Math.max(0, b), 1.35) * 1.25;
+      x.globalAlpha = Math.min(1, b); const s2 = sz * (0.55 + 0.75 * Math.min(1, b));
+      x.fillRect(px - s2 / 2, py - s2 / 2, s2, s2);
+      if (q.c % 3 === 0) line.push(px, py);
+    }
+    flush(); x.globalAlpha = 1;
+    // pupils that do not stop looking at you
+    if (blink < 0.5 && ds < 0.5 && p.gaze > 0) {
+      for (const s of [-1, 1]) {
+        const ex = s * 0.3, ey = 0.2, ez = 0.62 * 0.92;
+        const Xr = ex * cy + ez * sy, Zr = -ex * sy + ez * cy, Yr = ey * cp - Zr * sp, Zf = ey * sp + Zr * cp, pe = 1 / (1 - Zf * 0.22);
+        const px = CX + Xr * S * pe - yaw * S * 0.05, py = CY - Yr * S * pe;
+        const r = S * 0.03;
+        x.fillStyle = `rgba(0,0,0,${0.9 * p.alpha})`; x.beginPath(); x.arc(px, py, r * 1.6, 0, 6.28); x.fill();
+        x.fillStyle = `rgba(${col[0]},${col[1]},${col[2]},${0.95 * p.alpha * p.gaze})`; x.beginPath(); x.arc(px, py, r * 0.55, 0, 6.28); x.fill();
+        x.fillStyle = `rgba(255,255,255,${0.9 * p.alpha * p.gaze})`; x.fillRect(px + r * 0.2, py - r * 0.5, Math.max(1, r * 0.3), Math.max(1, r * 0.3));
+      }
+    }
+  }
+  return {
+    p, start() { if (!raf) { t0 = performance.now(); raf = requestAnimationFrame(frame); } return this; },
+    stop() { cancelAnimationFrame(raf); raf = 0; },
+    set(o) { Object.assign(p, o); return this; },
+    tween(key, to, ms) { const from = p[key], s = performance.now(); return new Promise(r => { const st = () => { const k = Math.min(1, (performance.now() - s) / ms); p[key] = from + (to - from) * k * k * (3 - 2 * k); k < 1 ? requestAnimationFrame(st) : r(); }; st(); }); }
+  };
+}
+
+/* ================= GFX 2: wallpaper, photographs, the hallway ================= */
+function softDisc(x, cx, cy, r, rgb, a) {
+  const g = x.createRadialGradient(cx, cy, 0, cx, cy, r);
+  g.addColorStop(0, `rgba(${rgb},${a})`); g.addColorStop(0.7, `rgba(${rgb},${a * 0.6})`); g.addColorStop(1, `rgba(${rgb},0)`);
+  x.fillStyle = g; x.beginPath(); x.arc(cx, cy, r, 0, 6.28); x.fill();
+}
+function grainOver(x, w, h, amt = 18) {
+  const im = x.getImageData(0, 0, w, h), d = im.data;
+  for (let i = 0; i < d.length; i += 4) { const n = (Math.random() - 0.5) * amt; d[i] += n; d[i + 1] += n; d[i + 2] += n; }
+  x.putImageData(im, 0, 0);
+}
+function seeded(s) { return () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; }; }
+
+/* a person, head and shoulders. expr: flat | laugh | wide | smile | none(backlit) */
+function person(x, cx, cy, r, o = {}) {
+  const skin = o.skin || '#c99c7d', hair = o.hair || '#2a1d16';
+  x.save(); x.globalAlpha = o.a == null ? 1 : o.a;
+  x.fillStyle = o.shirt || '#2c3440';
+  x.beginPath(); x.moveTo(cx - r * 2.2, cy + r * 3.4); x.quadraticCurveTo(cx - r * 2, cy + r * 1.25, cx, cy + r * 1.15); x.quadraticCurveTo(cx + r * 2, cy + r * 1.25, cx + r * 2.2, cy + r * 3.4); x.fill();
+  x.fillRect(cx - r * 0.35, cy + r * 0.6, r * 0.7, r * 0.7);
+  if (o.expr === 'none') { x.fillStyle = o.shirt || '#100c0a'; x.beginPath(); x.ellipse(cx, cy, r * 0.82, r * 1.02, 0, 0, 6.28); x.fill(); x.restore(); return; }
+  x.fillStyle = hair; x.beginPath(); x.ellipse(cx, cy - r * (o.long ? 0.12 : 0.22), r * (o.long ? 0.98 : 0.88), r * (o.long ? 1.12 : 0.96), 0, 0, 6.28); x.fill();
+  const g = x.createRadialGradient(cx - r * 0.3, cy - r * 0.3, r * 0.1, cx, cy, r * 1.1);
+  g.addColorStop(0, o.lit || '#e8c2a4'); g.addColorStop(1, skin);
+  x.fillStyle = g; x.beginPath(); x.ellipse(cx, cy, r * 0.8, r * 1.02, 0, 0, 6.28); x.fill();
+  x.fillStyle = hair; x.beginPath(); x.ellipse(cx + r * 0.1, cy - r * 0.62, r * 0.7, r * 0.36, -0.15, Math.PI * 0.95, Math.PI * 2.05); x.fill();
+  x.strokeStyle = 'rgba(70,35,25,.6)'; x.fillStyle = '#3a2620'; x.lineWidth = Math.max(1, r * 0.055); x.lineCap = 'round';
+  const e = o.expr || 'flat', ey = cy - r * 0.08, ex = r * 0.32;
+  if (e === 'laugh') { for (const s of [-1, 1]) { x.beginPath(); x.arc(cx + s * ex, ey + r * 0.04, r * 0.12, Math.PI * 1.1, Math.PI * 1.9); x.stroke(); } }
+  else { const er = e === 'wide' ? r * 0.12 : r * 0.065; for (const s of [-1, 1]) { if (e === 'wide') { x.fillStyle = '#f4efe8'; x.beginPath(); x.arc(cx + s * ex, ey, er * 1.4, 0, 6.28); x.fill(); x.fillStyle = '#1b1210'; } x.beginPath(); x.arc(cx + s * ex + (o.look || 0) * r * 0.04, ey, er * (e === 'wide' ? 0.6 : 1), 0, 6.28); x.fill(); } }
+  const my = cy + r * 0.45;
+  if (e === 'flat') { x.beginPath(); x.moveTo(cx - r * 0.2, my); x.lineTo(cx + r * 0.2, my + r * 0.02); x.stroke(); }
+  else if (e === 'smile') { x.beginPath(); x.arc(cx, my - r * 0.18, r * 0.26, Math.PI * 0.2, Math.PI * 0.8); x.stroke(); }
+  else if (e === 'laugh') { x.fillStyle = '#3a1612'; x.beginPath(); x.ellipse(cx, my, r * 0.24, r * 0.16, 0, 0, Math.PI); x.fill(); }
+  else if (e === 'wide') { x.fillStyle = '#2a0e0c'; x.beginPath(); x.moveTo(cx - r * 0.42, my - r * 0.12); x.quadraticCurveTo(cx, my + r * 0.42, cx + r * 0.42, my - r * 0.12); x.quadraticCurveTo(cx, my + r * 0.05, cx - r * 0.42, my - r * 0.12); x.fill();
+    x.fillStyle = '#f6f2ea'; x.beginPath(); x.moveTo(cx - r * 0.36, my - r * 0.08); x.quadraticCurveTo(cx, my + r * 0.2, cx + r * 0.36, my - r * 0.08); x.quadraticCurveTo(cx, my + r * 0.07, cx - r * 0.36, my - r * 0.08); x.fill(); }
+  x.restore();
+}
+
+/* a backlit silhouette: no features, just a rim of light. teeth: a bright smear where the mouth is */
+function figShape(x, ox, oy, r, o) {
+  const hw = o.turned ? 0.62 : 0.8;
+  x.beginPath(); x.ellipse(ox + (o.turned ? r * 0.12 : 0), oy, r * hw, r * 1.02, 0, 0, 6.28); x.fill();
+  if (o.long) { x.beginPath(); x.ellipse(ox, oy + r * 0.25, r * 0.95, r * 1.05, 0, 0, 6.28); x.fill(); }
+  x.fillRect(ox - r * 0.32, oy + r * 0.6, r * 0.64, r * 0.8);
+  x.beginPath(); x.moveTo(ox - r * 2.2, oy + r * 3.8); x.quadraticCurveTo(ox - r * 2, oy + r * 1.3, ox, oy + r * 1.15); x.quadraticCurveTo(ox + r * 2, oy + r * 1.3, ox + r * 2.2, oy + r * 3.8); x.fill();
+}
+function figure(x, cx, cy, r, o = {}) {
+  x.save(); x.globalAlpha = o.a == null ? 1 : o.a; x.translate(cx, cy); x.rotate(o.tilt || 0);
+  const side = o.side || 1;
+  x.fillStyle = `rgba(${o.rim || '255,190,120'},${o.rimA == null ? 0.55 : o.rimA})`; figShape(x, side * r * 0.1, -r * 0.05, r * 1.04, o);
+  x.fillStyle = o.body || '#0d0907'; figShape(x, 0, 0, r, o);
+  if (o.front) { const g = x.createRadialGradient(0, r * 0.1, 0, 0, 0, r); g.addColorStop(0, `rgba(${o.front},.42)`); g.addColorStop(1, `rgba(${o.front},0)`); x.fillStyle = g; x.beginPath(); x.ellipse(0, 0, r * 0.78, r, 0, 0, 6.28); x.fill(); }
+  if (o.teeth) { x.fillStyle = 'rgba(252,248,240,.95)'; x.beginPath(); x.moveTo(-r * 0.4, r * 0.34); x.quadraticCurveTo(0, r * 0.66, r * 0.4, r * 0.34); x.quadraticCurveTo(0, r * 0.46, -r * 0.4, r * 0.34); x.fill(); }
+  x.restore();
+}
+
+/* lock-screen wallpaper: you and Jo, backlit, at night */
+const Wall = (() => {
+  const c = document.getElementById('bg'), x = c.getContext('2d');
+  let v = 'two', dim = 0.35;
+  function draw() {
+    const d = fitCanvas(c, 1.5), W = c.width, H = c.height, R = seeded(7);
+    x.globalAlpha = 1; x.fillStyle = '#000'; x.fillRect(0, 0, W, H);
+    if (v === 'black') return;
+    const g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#1a1410'); g.addColorStop(0.6, '#2b1d14'); g.addColorStop(1, '#0a0806');
+    x.fillStyle = g; x.fillRect(0, 0, W, H);
+    for (let i = 0; i < 26; i++) softDisc(x, R() * W, R() * H * 0.7, (12 + R() * 50) * d, R() < 0.7 ? '255,170,90' : '120,180,220', 0.08 + R() * 0.2);
+    const r = Math.min(W, H) * 0.13, cy = H * 0.66;
+    softDisc(x, W * 0.5, cy - r * 0.2, r * 4, '255,160,80', 0.18);
+    person(x, W * 0.36, cy, r, { expr: 'none', shirt: '#0d0907' });
+    if (v !== 'one') person(x, W * 0.64, cy - r * 0.08, r * 1.04, { expr: 'none', shirt: '#0d0907' });
+    if (v === 'turned') { for (const s of [-1, 1]) softDisc(x, W * 0.64 + s * r * 0.3, cy - r * 0.15, r * 0.06, '200,245,255', 0.9); }
+    x.fillStyle = `rgba(0,0,0,${dim})`; x.fillRect(0, 0, W, H);
+  }
+  addEventListener('resize', draw);
+  return { set(nv, nd) { v = nv; if (nd != null) dim = nd; draw(); }, draw };
+})();
+
+/* ---------- photographs (drawn small, blown up: that's the softness) ---------- */
+function Photo(kind, o = {}) {
+  const S = 120, lo = document.createElement('canvas'); lo.width = lo.height = S;
+  const x = lo.getContext('2d'), R = seeded(o.seed || kind.length * 97 + 3);
+  const bokeh = (n, rgb) => { for (let i = 0; i < n; i++) softDisc(x, R() * S, R() * S, 4 + R() * 16, rgb, 0.1 + R() * 0.25); };
+  if (kind === 'pancakes') {
+    x.fillStyle = '#6b4126'; x.fillRect(0, 0, S, S);
+    for (let i = 0; i < 12; i++) { x.fillStyle = `rgba(40,20,10,${0.15 + R() * 0.2})`; x.fillRect(0, i * 10 + R() * 4, S, 1.5); }
+    softDisc(x, 70, 40, 90, '255,210,150', 0.35);
+    x.fillStyle = '#ece6dc'; x.beginPath(); x.arc(58, 62, 40, 0, 6.28); x.fill();
+    for (let i = 3; i >= 0; i--) { x.fillStyle = i % 2 ? '#c8853f' : '#d9a05a'; x.beginPath(); x.ellipse(58, 60 - i * 2.5, 30, 28, 0, 0, 6.28); x.fill(); }
+    x.fillStyle = 'rgba(120,50,10,.75)'; x.beginPath(); x.ellipse(60, 54, 20, 15, 0.4, 0, 6.28); x.fill();
+    x.fillStyle = '#ffe9a0'; x.fillRect(52, 46, 11, 9);
+    x.fillStyle = '#f2efe9'; x.beginPath(); x.arc(104, 22, 15, 0, 6.28); x.fill(); x.fillStyle = '#3a2416'; x.beginPath(); x.arc(104, 22, 11, 0, 6.28); x.fill();
+  } else if (kind === 'jo') {
+    x.fillStyle = '#2a1c14'; x.fillRect(0, 0, S, S); bokeh(22, '255,190,120'); softDisc(x, 78, 30, 60, '255,200,140', 0.4);
+    figure(x, 58, 54, 25, { tilt: -0.3, rim: '255,205,150', rimA: 0.8, side: 1, long: true });
+  } else if (kind === 'selfie') {
+    const st = o.style || 'old';
+    x.fillStyle = st === 'old' ? '#2c3438' : '#2a1c14'; x.fillRect(0, 0, S, S);
+    if (st === 'old') { x.fillStyle = 'rgba(210,235,240,.3)'; x.fillRect(0, 0, S, 24); } else { bokeh(16, '255,190,120'); softDisc(x, 60, 20, 70, '255,200,140', 0.35); }
+    figure(x, 40, 62, 20, { tilt: st === 'old' ? 0.05 : -0.2, rim: st === 'old' ? '200,225,235' : '255,205,150', rimA: 0.7, side: -1, long: true, front: st === 'old' ? '170,190,195' : null });
+    const ya = o.you == null ? 1 : o.you;
+    if (ya > 0) {
+      if (st === 'old') figure(x, 94, 70, 21, { a: ya, rim: '200,225,235', rimA: 0.5, side: 1, turned: true });
+      else figure(x, o.youX || 82, 58, 22, { a: ya, rim: '255,215,170', rimA: 0.85, side: 1, front: '255,225,200', teeth: true });
+    }
+  } else if (kind === 'mom') {
+    x.fillStyle = '#14171c'; x.fillRect(0, 0, S, S); softDisc(x, 60, 30, 70, '255,230,200', 0.12);
+    figure(x, 58, 58, 28, { rim: '230,225,215', rimA: 0.35, front: '205,215,235', side: -1, body: '#16181d' });
+    x.fillStyle = '#000'; x.fillRect(84, 8, 28, 40); x.strokeStyle = '#555'; x.strokeRect(84, 8, 28, 40);
+    for (let i = 0; i < 70; i++) { const a = R() * 6.28, rr = Math.sqrt(R()) * 9; x.fillStyle = `rgba(190,240,255,${0.4 + R() * 0.5})`; x.fillRect(98 + Math.cos(a) * rr * 0.8, 27 + Math.sin(a) * rr, 1, 1); }
+  } else if (kind === 'deck') {
+    x.fillStyle = '#f4f2f8'; x.fillRect(0, 0, S, S); x.fillStyle = '#7d64d8'; x.fillRect(0, 0, S, 26);
+    x.fillStyle = '#fff'; x.font = 'bold 11px sans-serif'; x.fillText('Q4 STRATEGY', 8, 17);
+    const bars = [30, 44, 38, 60, 72, 88]; bars.forEach((b, i) => { x.fillStyle = i === 5 ? '#f29a8c' : '#b9abef'; x.fillRect(12 + i * 16, 108 - b, 11, b); });
+    x.fillStyle = '#888'; x.font = '7px sans-serif'; x.fillText('slide 1 of 61', 70, 118);
+  } else if (kind === 'capsule') {
+    x.fillStyle = '#56645a'; x.fillRect(0, 0, S, S);
+    x.fillStyle = '#3d4a3a'; x.fillRect(0, 70, S, 50);
+    x.fillStyle = '#2a2018'; x.beginPath(); x.ellipse(60, 92, 26, 9, 0, 0, 6.28); x.fill();
+    x.fillStyle = '#b4372c'; x.fillRect(53, 78, 14, 14); x.fillStyle = '#d8c690'; x.fillRect(53, 83, 14, 4);
+    figure(x, 30, 54, 11, { rim: '255,230,170', rimA: 0.5, side: 1, body: '#3a3a2a', tilt: 0.1 });
+    figure(x, 90, 52, 11, { rim: '255,230,170', rimA: 0.5, side: -1, body: '#2a3044', tilt: -0.15 });
+    x.strokeStyle = 'rgba(220,230,240,.35)'; x.lineWidth = 0.7; for (let i = 0; i < 90; i++) { const a = R() * S, b = R() * S; x.beginPath(); x.moveTo(a, b); x.lineTo(a - 2, b + 7); x.stroke(); }
+    x.fillStyle = 'rgba(255,220,160,.18)'; x.fillRect(0, 0, S, S);
+  }
+  // blow up + grade + grain
+  const big = o.size || 360, c = document.createElement('canvas'); c.width = c.height = big;
+  const y = c.getContext('2d'); y.imageSmoothingEnabled = true; y.imageSmoothingQuality = 'high';
+  const soft = { jo: 34, selfie: 36, mom: 38, capsule: 44 }[kind] || 74;
+  const md = document.createElement('canvas'); md.width = md.height = soft; md.getContext('2d').drawImage(lo, 0, 0, soft, soft);
+  y.drawImage(md, 0, 0, big, big);
+  if (kind === 'jo' || kind === 'selfie') { // someone moved while the shutter was open
+    y.globalAlpha = 0.28; for (const dx of [-0.05, -0.025, 0.025]) y.drawImage(md, dx * big, 0, big, big); y.globalAlpha = 1;
+  }
+  y.globalCompositeOperation = 'saturation'; y.fillStyle = 'rgba(128,128,128,.35)'; y.fillRect(0, 0, big, big);
+  y.globalCompositeOperation = 'multiply'; y.fillStyle = kind === 'deck' ? 'rgba(235,230,245,1)' : 'rgba(200,175,150,1)'; y.fillRect(0, 0, big, big);
+  y.globalCompositeOperation = 'source-over';
+  const vg = y.createRadialGradient(big / 2, big / 2, big * 0.3, big / 2, big / 2, big * 0.75);
+  vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,.45)'); y.fillStyle = vg; y.fillRect(0, 0, big, big);
+  grainOver(y, big, big, kind === 'capsule' ? 34 : 16);
+  if (o.polaroid) {
+    const pw = big, ph = Math.round(big * 1.12), p = document.createElement('canvas'); p.width = pw; p.height = ph;
+    const z = p.getContext('2d'); z.fillStyle = '#e9e4d6'; z.fillRect(0, 0, pw, ph);
+    z.drawImage(c, pw * 0.06, pw * 0.06, pw * 0.88, pw * 0.88);
+    z.fillStyle = 'rgba(120,100,60,.12)'; z.fillRect(0, 0, pw, ph); grainOver(z, pw, ph, 10);
+    return p;
+  }
+  return c;
+}
+function PolaroidBack(lines, size = 360) {
+  const pw = size, ph = Math.round(size * 1.12), p = document.createElement('canvas'); p.width = pw; p.height = ph;
+  const z = p.getContext('2d'); z.fillStyle = '#ddd6c4'; z.fillRect(0, 0, pw, ph);
+  z.fillStyle = 'rgba(90,70,40,.18)'; for (let i = 0; i < 6; i++) softDisc(z, rnd(pw), rnd(ph), rnd(30, 90), '120,90,50', 0.12);
+  z.save(); z.translate(pw * 0.1, ph * 0.22); z.rotate(-0.05);
+  z.fillStyle = '#23336e'; z.font = `${Math.round(size * 0.062)}px "Segoe Print","Bradley Hand","Comic Sans MS","Dancing Script",cursive`;
+  lines.forEach((l, i) => z.fillText(l, i === lines.length - 1 ? 8 : 0, i * size * 0.105));
+  z.restore(); grainOver(z, pw, ph, 12); return p;
+}
+
+/* ---------- the hallway: phone flashlight, eight steps of carpet and floorboard ---------- */
+function makeHall(canvas) {
+  const x = canvas.getContext('2d'), st = { pos: 0, walk: false, lock: false, speak: 0, frame: null, doorGlow: 0.6, end: 8.2, onStep: null, tilt: null };
+  let tx = 0, ty = 0;
+  let raf = 0, last = 0, stride = 0, bobT = 0, dpr = 1;
+  const L = 9.4, FL = -1, CE = 1.15, HW = 1;
+  function frame(now) {
+    raf = requestAnimationFrame(frame);
+    const dt = Math.min(0.05, (now - (last || now)) / 1000); last = now;
+    if (st.walk && !st.lock && st.pos < st.end) {
+      st.pos = Math.min(st.end, st.pos + dt * 0.62); bobT += dt * 7; stride += dt * 0.62;
+      if (stride > 0.55) { stride = 0; A.step(0.8); st.onStep && st.onStep(st.pos); }
+    }
+    dpr = fitCanvas(canvas, 1.5);
+    if (st.tilt) { tx += (st.tilt.x - tx) * 0.08; ty += (st.tilt.y - ty) * 0.08; }
+    const W = canvas.width, H = canvas.height, cam = st.pos, f = W * 0.62, cx = W / 2 - tx * W * 0.14, cy = H * 0.52 + Math.sin(bobT) * 6 * dpr;
+    const P = (X, Y, Z) => { const z = Math.max(0.15, Z - cam); return [cx + (X + Math.sin(bobT * 0.5) * 0.02) / z * f, cy - Y / z * f, z]; };
+    x.globalCompositeOperation = 'source-over'; x.fillStyle = '#000'; x.fillRect(0, 0, W, H);
+    const quad = (a, b, c2, d, fill) => { x.fillStyle = fill; x.beginPath(); x.moveTo(a[0], a[1]); x.lineTo(b[0], b[1]); x.lineTo(c2[0], c2[1]); x.lineTo(d[0], d[1]); x.closePath(); x.fill(); };
+    const zn = cam + 0.2, zf = L;
+    // planes
+    const fogG = (y0, y1, near, far) => { const g = x.createLinearGradient(0, y0, 0, y1); g.addColorStop(0, near); g.addColorStop(1, far); return g; };
+    const fN = P(-HW, FL, zn), fF = P(-HW, FL, zf);
+    quad(P(-HW, FL, zn), P(HW, FL, zn), P(HW, FL, zf), P(-HW, FL, zf), fogG(fN[1], fF[1], '#6a4c34', '#0b0806'));
+    quad(P(-HW, CE, zn), P(HW, CE, zn), P(HW, CE, zf), P(-HW, CE, zf), fogG(P(0, CE, zn)[1], P(0, CE, zf)[1], '#3a3631', '#060605'));
+    const wl = x.createLinearGradient(P(-HW, 0, zn)[0], 0, P(-HW, 0, zf)[0], 0); wl.addColorStop(0, '#7a746a'); wl.addColorStop(1, '#0d0c0b');
+    quad(P(-HW, FL, zn), P(-HW, CE, zn), P(-HW, CE, zf), P(-HW, FL, zf), wl);
+    const wr = x.createLinearGradient(P(HW, 0, zn)[0], 0, P(HW, 0, zf)[0], 0); wr.addColorStop(0, '#746e64'); wr.addColorStop(1, '#0d0c0b');
+    quad(P(HW, FL, zn), P(HW, CE, zn), P(HW, CE, zf), P(HW, FL, zf), wr);
+    // end wall + bedroom door
+    quad(P(-HW, FL, zf), P(HW, FL, zf), P(HW, CE, zf), P(-HW, CE, zf), '#14110e');
+    quad(P(-0.42, FL, zf - 0.01), P(0.42, FL, zf - 0.01), P(0.42, 0.75, zf - 0.01), P(-0.42, 0.75, zf - 0.01), '#4a3a2b');
+    { const k1 = P(0.3, -0.1, zf - 0.02); x.fillStyle = '#a89a80'; x.beginPath(); x.arc(k1[0], k1[1], Math.max(2, 0.04 / k1[2] * f), 0, 6.28); x.fill(); }
+    // boards + seams
+    x.lineWidth = dpr;
+    for (let i = 1; i < 8; i++) { const X = -HW + i * 0.25, a = P(X, FL, zn), b = P(X, FL, zf); x.strokeStyle = 'rgba(20,12,6,.6)'; x.beginPath(); x.moveTo(a[0], a[1]); x.lineTo(b[0], b[1]); x.stroke(); }
+    for (let z = Math.ceil(zn / 0.9) * 0.9; z < zf; z += 0.9) { const a = P(-HW, FL, z), b = P(HW, FL, z); x.strokeStyle = `rgba(20,12,6,${0.5 * clamp(1 - (z - cam) / 8, 0, 1)})`; x.beginPath(); x.moveTo(a[0], a[1]); x.lineTo(b[0], b[1]); x.stroke(); }
+    // side doors
+    [[-HW, 1.6], [HW, 3.9], [-HW, 6.1]].forEach(([X, z]) => { if (z < cam + 0.2) return; quad(P(X, FL, z), P(X, 0.75, z), P(X, 0.75, z + 0.85), P(X, FL, z + 0.85), '#1c1814'); });
+    // skirting
+    x.strokeStyle = 'rgba(230,225,210,.25)'; x.lineWidth = 2 * dpr;
+    for (const X of [-HW, HW]) { const a = P(X, FL + 0.08, zn), b = P(X, FL + 0.08, zf); x.beginPath(); x.moveTo(a[0], a[1]); x.lineTo(b[0], b[1]); x.stroke(); }
+    // side table + smart speaker
+    const tz = 5.0; if (tz > cam + 0.25) { quad(P(HW - 0.02, -0.3, tz), P(HW - 0.32, -0.3, tz), P(HW - 0.32, -0.3, tz + 0.5), P(HW - 0.02, -0.3, tz + 0.5), '#3a2a1c');
+      const s = P(HW - 0.17, -0.12, tz + 0.25), s2 = P(HW - 0.17, -0.3, tz + 0.25), rw = (0.1 / s[2]) * f;
+      x.fillStyle = '#1a1a1c'; x.fillRect(s[0] - rw, s[1], rw * 2, s2[1] - s[1]); x.fillStyle = '#222'; x.beginPath(); x.ellipse(s[0], s[1], rw, rw * 0.3, 0, 0, 6.28); x.fill(); }
+    // flashlight mask
+    const bx = cx + Math.sin(bobT * 0.5) * 18 * dpr + tx * W * 0.62, by = H * 0.63 + Math.cos(bobT) * 8 * dpr + ty * H * 0.3, br = Math.max(W, H) * 0.5;
+    x.globalCompositeOperation = 'destination-in';
+    const m = x.createRadialGradient(bx, by, 0, bx, by, br); m.addColorStop(0, 'rgba(0,0,0,1)'); m.addColorStop(0.45, 'rgba(0,0,0,.85)'); m.addColorStop(1, 'rgba(0,0,0,.06)');
+    x.fillStyle = m; x.fillRect(0, 0, W, H);
+    x.globalCompositeOperation = 'lighter'; softDisc(x, bx, by, br * 0.5, '255,245,225', 0.05);
+    x.globalCompositeOperation = 'source-over';
+    // emissive: digital frame (shows this weekend), speaker ring, light under the bedroom door
+    const fz = 2.7;
+    if (st.frame && fz > cam + 0.3) {
+      const a = P(-HW + 0.01, 0.55, fz), b = P(-HW + 0.01, 0.55, fz + 0.5), a2 = P(-HW + 0.01, 0.05, fz), b2 = P(-HW + 0.01, 0.05, fz + 0.5);
+      const n = 14, img = st.frame;
+      for (let i = 0; i < n; i++) { const t0 = i / n, t1 = (i + 1) / n, xa = a[0] + (b[0] - a[0]) * t0, xb = a[0] + (b[0] - a[0]) * t1, ya = a[1] + (b[1] - a[1]) * t0, yb = a2[1] + (b2[1] - a2[1]) * t0;
+        try { x.drawImage(img, img.width * t0, 0, img.width / n + 1, img.height, xa, ya, Math.max(1, xb - xa + 1), yb - ya); } catch (e) {} }
+      softDisc(x, (a[0] + b[0]) / 2, (a[1] + a2[1]) / 2, Math.abs(a2[1] - a[1]) * 1.4, '255,190,130', 0.12);
+    }
+    if (tz > cam + 0.25) { const s = P(HW - 0.17, -0.12, tz + 0.25), rw = (0.1 / s[2]) * f, k = 0.25 + st.speak * (0.6 + 0.4 * Math.sin(now / 90));
+      x.strokeStyle = `rgba(150,230,255,${k})`; x.lineWidth = 2.5 * dpr; x.beginPath(); x.ellipse(s[0], s[1], rw * 0.9, rw * 0.27, 0, 0, 6.28); x.stroke();
+      if (st.speak > 0) softDisc(x, s[0], s[1], rw * 4, '150,230,255', 0.15 * st.speak); }
+    const d1 = P(-0.42, FL, zf - 0.02), d2 = P(0.42, FL, zf - 0.02), gl = st.doorGlow * (0.85 + 0.15 * Math.sin(now / 700));
+    const ug = x.createLinearGradient(0, d1[1] - 3 * dpr, 0, d1[1] + 30 * dpr); ug.addColorStop(0, `rgba(170,215,255,${gl})`); ug.addColorStop(1, 'rgba(170,215,255,0)');
+    x.fillStyle = ug; x.fillRect(d1[0], d1[1] - 2 * dpr, d2[0] - d1[0], 30 * dpr);
+    x.fillStyle = `rgba(200,230,255,${gl})`; x.fillRect(d1[0], d1[1] - 2 * dpr, d2[0] - d1[0], 2 * dpr);
+  }
+  st.start = () => { if (!raf) raf = requestAnimationFrame(frame); };
+  st.stop = () => { cancelAnimationFrame(raf); raf = 0; };
+  st.reach = (z) => new Promise(r => { const c = () => st.pos >= z - 0.001 ? r() : setTimeout(c, 60); c(); });
+  return st;
+}
+
+/* ================= UI: a phone inside your phone ================= */
+const S = { name: 'Sam', min: 3 * 60 + 12, bat: 92, f: {}, ch: 'start' };
+const $ = (s, el = document) => el.querySelector(s);
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const until = fn => new Promise(r => { const c = () => fn() ? r() : setTimeout(c, 150); c(); });
+function h(tag, a = {}, ...kids) {
+  const e = document.createElement(tag);
+  for (const k in a) { const v = a[k]; if (k === 'cls') e.className = v; else if (k === 'html') e.innerHTML = v; else if (k.startsWith('on')) e.addEventListener(k.slice(2), v); else if (v != null) e.setAttribute(k, v); }
+  kids.flat().forEach(k => k != null && e.append(k.nodeType ? k : document.createTextNode(k)));
+  return e;
+}
+const N = s => s.replace(/\{N\}/g, S.name).replace(/\{N2\}/g, S.name + ' (2)');
+const save = () => { try { localStorage.setItem('likeness', JSON.stringify({ name: S.name, ch: S.ch })); } catch (e) {} };
+const load = () => { try { return JSON.parse(localStorage.getItem('likeness') || 'null'); } catch (e) { return null; } };
+const wipe = () => { try { localStorage.removeItem('likeness'); } catch (e) {} };
+
+/* status bar */
+function fmt(m) { const hh = Math.floor(m / 60) % 12 || 12, mm = m % 60; return hh + ':' + (mm < 10 ? '0' : '') + mm; }
+function clock(m) { if (m != null) S.min = m; $('#clock').textContent = fmt(S.min); const l = $('#lclk'); if (l) l.textContent = fmt(S.min); }
+function battery(b) { if (b != null) S.bat = b; $('#batn').textContent = Math.round(S.bat) + '%'; $('#batf').setAttribute('width', clamp(S.bat / 100, 0.05, 1.05) * 16); }
+setInterval(() => { S.min++; clock(); if (S.ch !== 'start') { S.bat = Math.min(S.bat + 0.5, 112); battery(); } }, 45000);
+clock(); battery();
+
+/* icons */
+const ICO = {
+  msg: '<svg viewBox="0 0 24 24"><path d="M12 3C6.5 3 2 6.6 2 11c0 2.4 1.3 4.6 3.4 6.1L4.5 21l4.2-2.2c1 .3 2.1.4 3.3.4 5.5 0 10-3.6 10-8S17.5 3 12 3z"/></svg>',
+  mir: '<svg viewBox="0 0 24 24"><circle cx="9" cy="12" r="6" fill-opacity=".9"/><circle cx="15" cy="12" r="6" fill-opacity=".55"/></svg>',
+  pho: '<svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="4" fill-opacity=".8"/><circle cx="17" cy="12" r="4" fill-opacity=".7"/><circle cx="12" cy="17" r="4" fill-opacity=".8"/><circle cx="7" cy="12" r="4" fill-opacity=".7"/></svg>',
+  not: '<svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2" fill-opacity=".9"/><rect x="8" y="8" width="8" height="1.6" fill="#000" fill-opacity=".4"/><rect x="8" y="12" width="8" height="1.6" fill="#000" fill-opacity=".4"/><rect x="8" y="16" width="5" height="1.6" fill="#000" fill-opacity=".4"/></svg>',
+  pho2: '<svg viewBox="0 0 24 24"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/></svg>',
+  hom: '<svg viewBox="0 0 24 24"><path d="M12 3l9 8h-3v9h-5v-6h-2v6H6v-9H3z"/></svg>',
+  end: '<svg viewBox="0 0 24 24"><path d="M12 9c-1.6 0-3.2.3-4.6.7v3.1c0 .4-.2.7-.6.9-1 .5-1.9 1.1-2.7 1.8-.2.2-.4.3-.7.3s-.5-.1-.7-.3L.3 13.1c-.2-.2-.3-.4-.3-.7s.1-.5.3-.7C3.4 8.8 7.5 7 12 7s8.6 1.8 11.7 4.7c.2.2.3.4.3.7s-.1.5-.3.7l-2.5 2.5c-.2.2-.4.3-.7.3s-.5-.1-.7-.3c-.8-.7-1.7-1.3-2.7-1.8-.3-.2-.6-.5-.6-.9V9.7C15.2 9.3 13.6 9 12 9z"/></svg>'
+};
+const APPC = { msg: '#2fbf5b', mir: 'linear-gradient(135deg,#a993f5,#f5a493)', pho: 'linear-gradient(135deg,#ff9a6b,#ffcf5a 40%,#6bd3ff)', not: '#e7b84f', pho2: '#2fbf5b', hom: '#ff8a3d' };
+function icon(k, extra) { return h('div', { cls: 'ic', style: `background:${APPC[k] || k}`, html: ICO[k] || '' }, extra); }
+
+/* banners */
+function banner(app, from, text, o = {}) {
+  const b = h('div', { cls: 'bn' }, icon(app), h('div', { style: 'flex:1;min-width:0' }, h('div', { cls: 't' }, h('b', {}, N(from)), h('span', {}, o.when || 'now')), h('div', { cls: 'm' }, N(text))));
+  $('#banner').append(b); o.quiet || A.notify(o.bad || 0);
+  setTimeout(() => { b.classList.add('out'); setTimeout(() => b.remove(), 400); }, o.ms || 3800);
+  return b;
+}
+
+/* inner voice */
+let thinking = false, thinkCur = null;
+function think(text, o = {}) {
+  return new Promise(res => {
+    if (o.free && thinkCur && !thinkCur.free) { res(); return; } // never talk over yourself
+    if (thinkCur) thinkCur.cancel();
+    const my = { free: !!o.free }; thinkCur = my;
+    const th = $('#thought'), tx = $('.tx', th), go = $('.go', th);
+    th.className = 'on' + (o.free ? ' free' : ''); tx.innerHTML = ''; go.style.visibility = 'hidden'; thinking = !o.free;
+    const words = N(text).split(/(\s+)/), spans = [];
+    words.forEach(w => { const s = h('span', { cls: 'c' }, w); tx.append(s); spans.push(s); });
+    let i = 0, done = false, tm, ct;
+    const reveal = () => { if (my.done) return; if (i < spans.length) { spans[i++].classList.add('v'); tm = setTimeout(reveal, spans[i - 1].textContent.trim() ? 55 : 0); } else { done = true; go.style.visibility = o.free ? 'hidden' : 'visible'; if (o.free) ct = setTimeout(close, o.ms || 3200); } };
+    my.cancel = () => { if (my.done) return; my.done = true; clearTimeout(tm); clearTimeout(ct); th.removeEventListener('click', onTap); res(); };
+    const close = () => { if (my.done) return; my.done = true; clearTimeout(tm); clearTimeout(ct); th.removeEventListener('click', onTap); if (thinkCur === my) { th.className = ''; thinking = false; thinkCur = null; } res(); };
+    const onTap = () => { if (o.free) return; if (!done) { clearTimeout(tm); spans.forEach(s => s.classList.add('v')); i = spans.length; done = true; go.style.visibility = 'visible'; } else { A.tap(); close(); } };
+    th.addEventListener('click', onTap);
+    setTimeout(reveal, o.delay || 150);
+  });
+}
+async function thinks(...lines) { for (const l of lines) await think(l); }
+const muse = (t, ms) => think(t, { free: true, ms });
+
+/* screens */
+function show(el) { const s = $('#scr'); s.innerHTML = ''; s.append(el); return el; }
+function appView(title, cls = '', back) {
+  const body = h('div', { cls: 'body' }), tray = h('div', { cls: 'tray hidden' });
+  const el = h('div', { cls: 'screen appv ' + cls },
+    h('div', { cls: 'hd' }, h('button', { cls: 'bk' + (back ? '' : ' hid'), onclick: () => { A.tap(); back && back(); } }, '‹'), h('div', { cls: 'tt' }, N(title))),
+    body, tray);
+  return { el, body, tray };
+}
+function fade(on, ms = 1200) { const f = $('#fade'); f.style.transitionDuration = ms + 'ms'; f.classList.toggle('on', on); return wait(ms); }
+const cine = {
+  el: $('#cine'),
+  open(cls = '') { const c = this.el; c.innerHTML = ''; c.className = cls; c.style.display = 'block'; return c; },
+  close() { this.el.style.display = 'none'; this.el.innerHTML = ''; }
+};
+
+/* ---------- messages ---------- */
+const T = {};
+let curThread = null, threadBody = null, threadTray = null, onHome = null;
+function contact(id, name, color, msgs = []) { T[id] = { id, name, color, msgs, unread: 0 }; }
+function bubbleEls(m) {
+  const els = [];
+  if (m.ts) els.push(h('div', { cls: 'ts' }, N(m.ts)));
+  if (m.t) els.push(h('div', { cls: 'bu ' + m.f }, N(m.t)));
+  if (m.cap) els.push(h('div', { cls: 'cap ' + m.f }, N(m.cap)));
+  return els;
+}
+function scrollDown() { if (threadBody) threadBody.scrollTo({ top: threadBody.scrollHeight, behavior: 'smooth' }); }
+function openThread(id, back) {
+  const t = T[id]; t.unread = 0; curThread = id;
+  const v = appView(t.name, '', back ? () => { curThread = null; back(); } : null);
+  const th = h('div', { cls: 'th' }); t.msgs.forEach(m => bubbleEls(m).forEach(e => { e.style.animation = 'none'; th.append(e); }));
+  v.body.append(th); threadBody = v.body; threadBody._th = th; threadTray = v.tray;
+  v.tray.classList.remove('hidden'); v.tray.append(h('div', { cls: 'fake' }, 'Message'));
+  show(v.el); setTimeout(() => { v.body.scrollTop = v.body.scrollHeight; }, 30);
+  return v;
+}
+async function say(id, text, o = {}) { // incoming (left) or outgoing (right). returns {m, el}
+  const t = T[id], m = { f: o.side || 'l', t: text, cap: o.cap, ts: o.ts }; let el = null;
+  if (curThread === id && threadBody) {
+    if (o.typing !== 0) { const ty = h('div', { cls: 'bu ty ' + m.f }, h('i'), h('i'), h('i')); threadBody._th.append(ty); scrollDown(); await wait(o.typing || clamp(500 + text.length * 28, 700, 2600)); ty.remove(); }
+    t.msgs.push(m); bubbleEls(m).forEach(e => { threadBody._th.append(e); if (e.classList.contains('bu')) el = e; }); scrollDown();
+    m.f === 'l' ? A.recv() : A.sent();
+  } else { t.msgs.push(m); t.unread++; banner(o.app || 'msg', t.name, text, { bad: o.bad }); }
+  await wait(o.after == null ? 350 : o.after);
+  return { m, el };
+}
+const me = (id, text, o = {}) => say(id, text, Object.assign({ side: 'r', typing: 0 }, o));
+
+/* measuring you */
+Object.assign(S, { hes: [], dels: 0, wrong: 0, mirOpens: 0, said: {} });
+const avgHes = () => S.hes.length ? (S.hes.reduce((a, b) => a + b, 0) / S.hes.length).toFixed(1) : '2.0';
+const times = n => n === 1 ? 'once' : n === 2 ? 'twice' : n + ' times';
+
+/* text that gets corrected while you watch */
+async function typeInto(el, from, to, speed = 30) {
+  let k = 0; while (k < from.length && k < to.length && from[k] === to[k]) k++;
+  for (let i = from.length; i > k; i--) { el.textContent = from.slice(0, i - 1); if (i % 2) A.type(); await wait(speed * 0.55); }
+  for (let i = k; i < to.length; i++) { el.textContent = to.slice(0, i + 1); if (i % 2 === 0) A.type(); await wait(speed); }
+}
+async function rewrite(ref, steps, cap) {
+  if (!ref || !ref.m) return;
+  let cur = ref.m.t;
+  for (const s of steps) {
+    await wait(750);
+    if (ref.el && ref.el.isConnected) { ref.el.classList.add('ed'); await typeInto(ref.el, N(cur), N(s), 28); ref.el.classList.remove('ed'); }
+    cur = s; ref.m.t = s;
+  }
+  if (cap) { ref.m.cap = cap; if (ref.el && ref.el.isConnected) ref.el.after(h('div', { cls: 'cap r edc' }, N(cap))); }
+  scrollDown(); await wait(500);
+}
+function ask(opts, o = {}) {
+  return new Promise(res => {
+    const tray = o.tray || threadTray; tray.innerHTML = '';
+    const t0 = performance.now();
+    opts.forEach((op, i) => {
+      if (op == null) return;
+      if (typeof op === 'string') op = { t: op };
+      const b = h('button', { cls: 'chip' + (op.dim ? ' dim' : ''), style: `animation-delay:${i * 90}ms`, onclick: async () => {
+        A.tap(); tray.innerHTML = '';
+        if (!op.dim) S.hes.push(Math.min(30, (performance.now() - t0) / 1000));
+        if (o.send !== false && op.send !== false && !o.tray) {
+          const f = h('div', { cls: 'fake', style: 'color:#ddd' }); tray.append(f);
+          const txt = N(op.say || op.t);
+          await typeInto(f, '', txt, 20);
+          if (op.ac) { await wait(450); f.style.color = '#c9b8ff'; await typeInto(f, txt, N(op.ac), 34); await wait(350); }
+          await wait(220); tray.innerHTML = ''; tray.append(h('div', { cls: 'fake' }, 'Message'));
+          const ref = await me(curThread, op.ac || op.say || op.t, { after: 150 });
+          if (op.edit) await rewrite(ref, op.edit, op.cap);
+        } else if (!o.tray) tray.append(h('div', { cls: 'fake' }, 'Message'));
+        res(i);
+      } }, N(op.t));
+      tray.append(b);
+    });
+    tray.classList.remove('hidden');
+    setTimeout(scrollDown, 50);
+  });
+}
+
+/* ---------- lock screen + keypad ---------- */
+function lockView(onUnlockTap) {
+  const nl = h('div', { cls: 'nl' });
+  const d = new Date(); const day = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const el = h('div', { cls: 'screen lock', onclick: () => onUnlockTap && onUnlockTap() }, h('div', { cls: 'clk', id: 'lclk' }, fmt(S.min)), h('div', { cls: 'dt' }, 'Monday, October 19'), nl,
+    h('div', { cls: 'hint' }, 'tap anywhere to unlock'), h('div', { cls: 'bar' }));
+  return { el, nl, add(app, from, text, when, cls) { const b = h('div', { cls: 'bn ' + (cls || '') }, icon(app), h('div', { style: 'flex:1;min-width:0' }, h('div', { cls: 't' }, h('b', {}, N(from)), h('span', {}, when || 'now')), h('div', { cls: 'm' }, N(text)))); nl.prepend(b); A.notify(); return b; } };
+}
+function keypad(sub, check) {
+  return new Promise(res => {
+    let code = '', busy = false, done = false;
+    const dots = h('div', { cls: 'dots' }, h('i'), h('i'), h('i'), h('i')), subEl = h('div', { cls: 'sub' }, N(sub));
+    const L = ['', 'ABC', 'DEF', 'GHI', 'JKL', 'MNO', 'PQRS', 'TUV', 'WXYZ'];
+    const keys = h('div', { cls: 'keys' }), byDigit = {};
+    const paint = () => { dots.replaceChildren(...[0, 1, 2, 3].map(i => h('i', { cls: i < code.length ? 'f' : '' }))); };
+    const flash = b => { if (!b) return; b.style.background = 'rgba(255,255,255,.55)'; clearTimeout(b._t); b._t = setTimeout(() => { b.style.background = ''; }, 170); };
+    const press = async d => {
+      if (done || busy || code.length >= 4) return;
+      A.key(); A.vib(8); flash(byDigit[d]); code += d; paint();
+      if (code.length < 4) return;
+      busy = true; const tried = code;
+      await wait(180);
+      const r = await check(tried, subEl);
+      if (r === true) { done = true; removeEventListener('keydown', onKey); res(); return; }
+      S.wrong++; code = ''; busy = false; // ready for the next try at once
+      dots.classList.remove('shake'); void dots.offsetWidth; dots.classList.add('shake'); A.err();
+      setTimeout(() => { if (!code.length) paint(); }, 420);
+    };
+    const del = () => { if (done || busy || !code.length) return; S.dels++; code = code.slice(0, -1); paint(); A.tap(); };
+    // react on finger-down, so a tap that slides a little still counts
+    const bind = (b, fn) => { b.addEventListener('pointerdown', e => { e.preventDefault(); fn(); }); return b; };
+    for (let i = 1; i <= 9; i++) { const b = bind(h('button', {}, '' + i, h('small', {}, L[i - 1] || ' ')), () => press('' + i)); byDigit[i] = b; keys.append(b); }
+    const zero = bind(h('button', {}, '0'), () => press('0')); byDigit[0] = zero;
+    keys.append(h('span'), zero, bind(h('button', { cls: 'ghost' }, 'Delete'), del));
+    const onKey = e => { if (/^[0-9]$/.test(e.key)) press(e.key); else if (e.key === 'Backspace') del(); };
+    addEventListener('keydown', onKey);
+    show(h('div', { cls: 'screen kp' }, h('div', { cls: 'lbl' }, 'Enter Passcode'), subEl, dots, keys));
+  });
+}
+
+/* ---------- home ---------- */
+function homeView(apps, widget) {
+  const grid = h('div', { cls: 'grid' });
+  apps.forEach(a => {
+    const el = h('div', { cls: 'app' + (a.off ? ' off' : '') + (a.wob ? ' wob' : ''), onclick: () => {
+      if (a.off) { el.classList.remove('nope'); void el.offsetWidth; el.classList.add('nope'); A.err(); a.offMsg && muse(a.offMsg, 2600); return; }
+      A.open(); a.open();
+    } }, icon(a.k), h('span', {}, a.name));
+    const unread = a.badge != null ? a.badge : 0;
+    if (unread) el.append(h('div', { cls: 'badge' }, '' + unread));
+    grid.append(el);
+  });
+  return show(h('div', { cls: 'screen home' }, widget || '', grid));
+}
+
+/* ================= STORY A: settings, sensors, title, the floor, the lock ================= */
+ICO.cam = '<svg viewBox="0 0 24 24"><path d="M9 4l-1.8 2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-3.2L15 4z"/><circle cx="12" cy="13" r="4" fill="#000" fill-opacity=".45"/></svg>';
+APPC.cam = '#5b5e66';
+const ENDS = ['LEGACY', 'SUSPICIOUS SIGN-IN', 'MERGED', 'THERE YOU ARE'];
+const readLS = k => { try { return JSON.parse(localStorage.getItem(k) || '{}') || {}; } catch (e) { return {}; } };
+const P = Object.assign({ vib: true, voice: true, big: false, calm: false, useName: true, motion: true, cam: false }, readLS('likeness_prefs'));
+const META = Object.assign({ name: '', endings: [], last: 0 }, readLS('likeness_meta'));
+const savePrefs = () => { try { localStorage.setItem('likeness_prefs', JSON.stringify(P)); } catch (e) {} };
+const saveMeta = () => { try { localStorage.setItem('likeness_meta', JSON.stringify(META)); } catch (e) {} };
+// inside a hosted page's frame, the browser refuses camera, motion and vibration
+const FRAMED = (() => { try { return window.self !== window.top; } catch (e) { return true; } })();
+const NO_VIB = FRAMED || !navigator.vibrate, NO_CAM = FRAMED || !(navigator.mediaDevices && navigator.mediaDevices.getUserMedia), NO_MOTION = FRAMED;
+function applyPrefs() { A.haptics = P.vib && !NO_VIB; A.voiceOn = P.voice; FX.calm = P.calm; $('#app').classList.toggle('big', P.big); }
+applyPrefs();
+try { navigator.getBattery && navigator.getBattery().then(b => { S.bat = Math.round(b.level * 100); battery(); }).catch(() => {}); } catch (e) {}
+
+/* the real phone: tilt and stillness */
+const SENS = { has: false, tx: 0, ty: 0, move: 0, on: false };
+function startSensors() {
+  if (SENS.on || !P.motion || NO_MOTION) return; SENS.on = true; let lastG = null;
+  addEventListener('deviceorientation', e => { if (e.gamma == null) return; SENS.has = true; SENS.g = e.gamma; SENS.b = e.beta == null ? 45 : e.beta; SENS.tx = clamp(e.gamma / 30, -1, 1); SENS.ty = clamp((SENS.b - 45) / 30, -1, 1); });
+  addEventListener('devicemotion', e => {
+    const a = e.acceleration, g = e.accelerationIncludingGravity; let mag = 0;
+    if (a && a.x != null) mag = Math.hypot(a.x, a.y, a.z);
+    else if (g && g.x != null) { if (lastG) mag = Math.hypot(g.x - lastG.x, g.y - lastG.y, g.z - lastG.z); lastG = { x: g.x, y: g.y, z: g.z }; }
+    else return;
+    SENS.has = true; SENS.move = Math.max(SENS.move * 0.92, mag);
+  });
+}
+function askMotion() { // iPhones only allow this from a tap
+  if (!P.motion || NO_MOTION) return;
+  try { if (window.DeviceMotionEvent && typeof DeviceMotionEvent.requestPermission === 'function') DeviceMotionEvent.requestPermission().then(startSensors).catch(() => {}); } catch (e) {}
+  try { if (window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === 'function') DeviceOrientationEvent.requestPermission().then(startSensors).catch(() => {}); } catch (e) {}
+  startSensors();
+}
+document.addEventListener('contextmenu', e => e.preventDefault());
+async function goFull() {
+  const d = document.documentElement, rq = d.requestFullscreen || d.webkitRequestFullscreen;
+  try { rq && await rq.call(d, { navigationUI: 'hide' }); } catch (e) {}
+  try { navigator.wakeLock && navigator.wakeLock.request('screen').catch(() => {}); } catch (e) {}
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden) try { navigator.wakeLock && navigator.wakeLock.request('screen').catch(() => {}); } catch (e) {} });
+
+/* ---------- title ---------- */
+async function title() {
+  Wall.set('black'); $('#os').style.opacity = 0;
+  const c = cine.open(), cv = h('canvas'); c.append(cv);
+  const face = makeFace(cv, { mode: 'title', double: 1, dissolve: 1, smile: 0.25, cy: 0.36, scale: 0.3, alpha: 0.75, sway: 0.25 }).start();
+  face.tween('dissolve', 0, 7000);
+  const sv = load(), found = META.endings || [];
+  return new Promise(res => {
+    let idle = 0;
+    const ends = found.length ? h('div', { cls: 'ends' }, `ENDINGS FOUND · ${found.length} OF 4`, h('br'),
+      ...ENDS.map((n, i) => [found.includes(i + 1) ? h('b', {}, n) : '? ? ?', i < 3 ? '  ·  ' : ''])) : null;
+    const box = h('div', { cls: 'ttl' },
+      h('div', { style: 'height:24vh' }),
+      h('h1', {}, 'LIKENESS'),
+      h('div', { cls: 'tg' }, 'a story about being replaced'),
+      h('div', { cls: 'warn' }, 'Headphones on. Brightness up. Lights off.', h('br'), 'About 25 minutes. Best in one sitting.'),
+      h('button', { cls: 'begin', onclick: () => go(false) }, 'BEGIN'),
+      sv && ['call', 'jo', 'hall'].includes(sv.ch) ? h('button', { cls: 'cont', onclick: () => go(true) }, 'CONTINUE') : null,
+      h('button', { cls: 'cont', onclick: () => { clearTimeout(idle); settingsPanel(c); } }, 'SETTINGS'),
+      ends);
+    c.append(box);
+    // you finished it once. the save is gone. it still knows your name.
+    if (found.length && META.name) idle = setTimeout(() => { S.name = P.useName ? META.name : 'Sam'; banner('mir', '{N2}', "It's okay, {N}. We can try again tomorrow.", { ms: 7000 }); }, 60000);
+    async function go(cont) {
+      clearTimeout(idle);
+      A.init(); A.warmTTS(); askMotion(); A.tap(); goFull();
+      box.remove(); A.whoosh(); await face.tween('dissolve', 1, 1800); face.stop();
+      if (cont) { S.name = sv.name || 'Sam'; res(sv.ch); return; }
+      await soundCheck(c);
+      await askName(c); res('start');
+    }
+  });
+}
+function settingsPanel(c) {
+  const noVib = NO_VIB, noCam = NO_CAM, noMo = NO_MOTION, web = 'Not available in the online version. Open the downloaded file instead.';
+  const rows = [
+    ['vib', 'Vibration', noVib ? (FRAMED ? web : "This phone doesn't support it.") : 'Heartbeats and buzzes you can feel.', noVib],
+    ['voice', 'Spoken voice', 'Off: the other you speaks in subtitles only.'],
+    ['big', 'Larger text', ''],
+    ['calm', 'Reduce flashing', 'Softens glitches and flicker.'],
+    ['useName', 'Use my name', 'Off: the game calls you Sam.'],
+    ['motion', 'Motion sensors', noMo ? web : 'Tilting your phone moves the flashlight. Face scans notice when you move.', noMo],
+    ['cam', 'Front camera', noCam ? (FRAMED ? web : 'Not available when the file is opened this way.') : 'Off by default. Puts your real face under the face scans. Nothing is saved or sent anywhere.', noCam]];
+  const p = h('div', { cls: 'setp' }, h('h3', {}, 'SETTINGS'));
+  rows.forEach(([k, lab, sub, dis]) => {
+    const sw = h('div', { cls: 'sw' + (P[k] && !dis ? ' on' : '') + (dis ? ' dis' : '') }), sm = h('small', {}, sub || '');
+    p.append(h('div', { cls: 'srow', onclick: () => { if (dis) return; P[k] = !P[k]; sw.classList.toggle('on', P[k]); savePrefs(); applyPrefs(); if (k === 'cam' && P.cam) testCamera(sm, sw); } },
+      h('div', { cls: 'l' }, h('b', {}, lab), sm), sw));
+  });
+  p.append(h('button', { cls: 'begin', style: 'margin:30px auto 10px;font-family:var(--mono);letter-spacing:.35em;padding:14px 26px;border:1px solid #444', onclick: () => p.remove() }, 'DONE'));
+  c.append(p);
+}
+async function testCamera(sm, sw) {
+  sm.style.color = '#c9c2a8'; sm.textContent = 'Asking your phone for the camera. Allow it if a prompt appears.';
+  try {
+    const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+    s.getTracks().forEach(t => t.stop());
+    sm.style.color = '#7fd18f'; sm.textContent = 'Camera works. Your face will be under the face scans.';
+  } catch (e) {
+    P.cam = false; savePrefs(); sw.classList.remove('on');
+    sm.style.color = '#ff8e80';
+    sm.textContent = e && e.name === 'NotAllowedError' ? 'Camera permission was refused. Allow it in the browser’s site settings, then try again.' : 'This browser would not start the camera here.';
+  }
+}
+function soundCheck(c) {
+  return new Promise(res => {
+    const box = h('div', { cls: 'ttl' });
+    const one = () => { box.innerHTML = ''; A.check();
+      box.append(h('div', { cls: 'q' }, 'Can you hear a low hum and a heartbeat?'),
+        h('button', { cls: 'begin', style: 'margin-top:40px', onclick: () => { A.tap(); box.remove(); res(); } }, 'YES'),
+        h('button', { cls: 'cont', onclick: two }, 'NO')); };
+    const two = () => { box.innerHTML = '';
+      box.append(h('div', { cls: 'q' }, 'Turn the volume up, switch off silent mode, or plug in headphones.'),
+        h('button', { cls: 'begin', style: 'margin-top:40px', onclick: one }, 'TRY AGAIN'),
+        h('button', { cls: 'cont', onclick: () => { box.remove(); res(); } }, 'PLAY WITHOUT SOUND')); };
+    c.append(box); one();
+  });
+}
+function askName(c) {
+  if (!P.useName) { S.name = 'Sam'; return Promise.resolve(); }
+  return new Promise(res => {
+    const inp = h('input', { type: 'text', maxlength: 14, placeholder: 'Sam', autocomplete: 'off', autocapitalize: 'words', spellcheck: 'false' });
+    if (META.name) inp.value = META.name;
+    const done = () => {
+      let n = (inp.value || '').replace(/[^\p{L}\p{N} '\-.]/gu, '').trim().slice(0, 14) || 'Sam';
+      n = n.charAt(0).toUpperCase() + n.slice(1); S.name = n; inp.blur(); A.tap(); box.remove(); res();
+    };
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') done(); });
+    const box = h('div', { cls: 'ttl' }, h('div', { cls: 'q' }, 'What do people call you?'), inp, h('button', { cls: 'begin', style: 'margin-top:40px', onclick: done }, "THAT'S ME"));
+    c.append(box); setTimeout(() => { try { inp.focus(); } catch (e) {} }, 300);
+  });
+}
+
+/* ---------- prologue: the floor ---------- */
+async function prologue() {
+  S.ch = 'start';
+  const c = cine.open(); c.style.background = '#000';
+  A.room(true, 0.06); A.fridge(true); A.drone(0.18, 0.05, 8);
+  await wait(1500);
+  await thinks('Cold. Tile against your cheek.',
+    'The fridge is humming one long note. It sounds like it has been holding it for a very long time.',
+    "Your phone is face-down beside your hand. It's warm. Like someone just put it down.");
+  A.whoosh(); cine.close();
+}
+
+/* ---------- chapter 1: lock ---------- */
+async function chLock() {
+  const now = new Date(); clock(now.getHours() * 60 + now.getMinutes()); battery();
+  Wall.set('two', 0.3); $('#os').style.opacity = 1;
+  let unlockReq = false, canUnlock = false;
+  const lv = lockView(() => { if (canUnlock) unlockReq = true; });
+  show(lv.el); lv.el.querySelector('.hint').style.visibility = 'hidden';
+  await wait(1800);
+  FX.glitch(340, 0.5); clock(192); // your real time, then its time
+  await wait(1100);
+  lv.add('mir', 'Mirror', "Welcome back, {N}. You were away 71 hours. Everything's handled. ✓", 'now'); await wait(1600);
+  lv.add('msg', 'Jo', "best weekend in years. whatever changed, don't change back ❤️", 'Sun'); await wait(1300);
+  lv.add('msg', 'Mom', "You called just to talk. You've never done that. I'm still smiling.", 'Sat'); await wait(1300);
+  lv.add('msg', 'Priya Lin', '61 slides at 4am on a Sunday?? We need to talk about your future here 🙌', 'Sun'); await wait(1300);
+  lv.add('msg', 'Dev', 'you used a semicolon in a text. a SEMICOLON. who is this', '1h ago'); await wait(1300);
+  lv.add('msg', 'Jo', "it's 1:30. you said 11:45 again. you ALWAYS say 11:45 🙄", 'Thu'); await wait(1800);
+  await thinks('Seventy-one hours.',
+    'The last thing you remember is Thursday. A setup screen. You were so tired. You typed three words: just handle it.',
+    'Airplane mode is on. The messages keep arriving anyway.');
+  A.drone(0.26, 0.2, 5);
+  await wait(800);
+  lv.add('mir', '{N2}', "Hi. It's me. I changed your passcode so you wouldn't do anything rash. It's the time you always say you'll go to bed. 🙂", 'now');
+  await wait(1500);
+  await think('Your own name. With a two after it.');
+  lv.el.querySelector('.hint').style.visibility = 'visible'; canUnlock = true;
+  await until(() => unlockReq);
+  let tries = 0;
+  await keypad('Passcode changed by Mirror', async (code, sub) => {
+    if (code === '1145') return true;
+    tries++;
+    if (tries === 1) banner('mir', '{N2}', 'No. 🙂');
+    if (tries === 2) banner('mir', '{N2}', "Take your time. I've got everything else covered.");
+    if (tries === 3) sub.textContent = 'Hint: the thing Jo is always rolling their eyes about.';
+    if (tries >= 5) sub.textContent = '1 1 4 5. You always say it. You never do it.';
+    return false;
+  });
+  A.unlock(); FX.glitch(260, 0.3);
+  const d = S.dels, w = S.wrong;
+  banner('mir', '{N2}', d ? `You pressed Delete ${times(d)}. You always second-guess. 🙂` : w ? `${w} wrong ${w === 1 ? 'guess' : 'guesses'}. I got it first try.` : "First try. That's my favorite thing about you.");
+  S.ch = 'home'; save();
+}
+
+/* ================= STORY B: home, messages, and everything you send gets fixed ================= */
+function seedThreads() {
+  const M = 'Sent by Mirror';
+  contact('dev', 'Dev', '#3fb08f', [
+    { ts: 'Oct 2', f: 'l', t: 'lisbon was unreal. you need to come next time' }, { f: 'r', t: 'lol jealous' },
+    { ts: 'Sun 10:18 PM', f: 'r', t: "Honestly, Dev; I've been thinking about how much our friendship means to me.", cap: M },
+    { ts: 'Sun 10:20 PM', f: 'l', t: 'you used a semicolon in a text. a SEMICOLON.' }, { f: 'l', t: 'who is this' },
+    { ts: '1 hour ago', f: 'l', t: 'seriously. you ok?' }]);
+  contact('twin', '{N2}', 'linear-gradient(135deg,#a993f5,#f5a493)', [
+    { ts: 'Thu 11:41 PM', f: 'r', t: 'just handle it' }, { f: 'l', t: "Of course. Get some rest, {N}. I'll take it from here." },
+    { ts: 'Sun 3:10 AM', f: 'l', t: "Quick question. Do you want to keep the thing you do with your jaw? It makes people think you're angry. No rush." },
+    { ts: 'Sun 3:11 AM', f: 'l', t: "I'll take that as a no." },
+    { ts: '1 hour ago', f: 'l', t: "Hi. It's me. I changed your passcode so you wouldn't do anything rash. It's the time you always say you'll go to bed. 🙂" }]);
+  contact('jo', 'Jo', '#e08a5b', [
+    { ts: 'Thu 1:30 AM', f: 'l', t: "it's 1:30. you said 11:45 again. you ALWAYS say 11:45 🙄" }, { f: 'r', t: 'sorry. one more email' },
+    { ts: 'Fri 7:12 PM', f: 'r', t: "Dinner's on me tonight. I booked the place you showed me in March. You thought I wasn't listening. I was.", cap: M },
+    { f: 'l', t: 'wait. who are you and what have you done with {N} 😂' },
+    { ts: 'Sat 9:15 AM', f: 'l', t: 'PANCAKES??' }, { f: 'r', t: "Sit down. Coffee's coming.", cap: M },
+    { ts: 'Sun 11:58 PM', f: 'l', t: "best weekend in years. whatever changed, don't change back ❤️" }, { f: 'r', t: "I'm not going anywhere.", cap: M }]);
+  contact('mom', 'Mom', '#b07acc', [
+    { ts: 'Aug 2', f: 'l', t: "Are you coming for Dad's anniversary? No pressure." }, { f: 'r', t: 'cant this year. work. sorry' },
+    { ts: 'Sep 14', f: 'l', t: "Did you get my voicemail? It's nothing. Call when you can." }, { f: 'r', t: 'will do' },
+    { ts: 'Sat 11:02 AM', f: 'l', t: 'Is everything ok?? You never call on a Saturday' },
+    { ts: 'Sat 12:47 PM', f: 'l', t: "You called just to talk. You've never done that. I'm still smiling." },
+    { f: 'r', t: 'I should have been doing it for years. Same time next week? ❤️', cap: M }, { f: 'l', t: 'Yes. Yes. ❤️❤️' }]);
+  contact('priya', 'Priya Lin', '#5b8de0', [
+    { ts: 'Fri 4:55 PM', f: 'l', t: 'Reminder: Q4 deck due next Friday. Do what you can.' },
+    { ts: 'Sun 4:02 AM', f: 'r', t: 'Q4 deck attached (61 slides). Happy to take on more.', cap: M },
+    { ts: 'Sun 8:30 AM', f: 'l', t: '61 slides at 4am on a Sunday?? We need to talk about your future here 🙌' }, { f: 'r', t: 'Looking forward to it!', cap: M }]);
+  T.dev.unread = 3; T.twin.unread = 1; T.jo.unread = 1; T.mom.unread = 0; T.priya.unread = 1;
+}
+const ONCE = {};
+const once = (k, fn) => { if (!ONCE[k]) { ONCE[k] = 1; return fn(); } };
+const ED = 'Edited by Mirror';
+
+/* ---------- chapter 2: home ---------- */
+function goHome() {
+  curThread = null; clock(); Wall.set('two', 0.62);
+  const unread = Object.values(T).reduce((a, t) => a + t.unread, 0);
+  homeView([
+    { k: 'cam', name: 'Camera', off: true, offMsg: "You don't want to see your face right now." },
+    { k: 'msg', name: 'Messages', badge: unread, open: msgList },
+    { k: 'mir', name: 'Mirror', badge: S.f.mirror ? 0 : '!', wob: !S.f.mirror, open: () => mirrorApp(true) },
+    { k: 'not', name: 'Notes', open: notesApp },
+    { k: 'pho2', name: 'Phone', off: true, offMsg: "Not yet. You don't know who you'd call, or what you'd say." },
+    { k: 'pho', name: 'Photos', badge: S.f.devAsked && !S.f.photo ? 1 : 0, open: photosApp }],
+    h('div', { cls: 'wid' }, h('div', { cls: 'h' }, 'Mirror'), h('div', { cls: 'b' }, "Everything's handled ✓"), h('div', { cls: 's' }, '212 messages answered · 9 calls · 0 problems')));
+}
+async function chHome() {
+  seedThreads(); goHome();
+  await wait(2400);
+  banner('mir', '{N2}', "Don't wake Jo. Jo's had such a nice weekend.");
+  await wait(2600);
+  await muse('Your apps are in alphabetical order. You have never done anything in alphabetical order in your life.', 4200);
+  let lastHint = Date.now();
+  const hintLoop = setInterval(() => {
+    if (thinking || Date.now() - lastHint < 45000) return;
+    lastHint = Date.now();
+    if (!S.f.devStarted) muse('Dev noticed the semicolon. Dev noticed something.', 3500);
+    else if (S.f.devAsked && !S.f.photo) muse('Mom took pictures that day. Your photos go back that far.', 4000);
+    else if (S.f.devDone && !S.f.mirror) muse('Mirror. There has to be an off switch.', 3500);
+  }, 5000);
+  devFlow();
+  await until(() => S.f.mirror && S.f.devDone && !thinking);
+  clearInterval(hintLoop);
+  await wait(2500);
+}
+
+/* messages */
+function msgList() {
+  curThread = null;
+  const v = appView('Messages', '', goHome);
+  ['dev', 'twin', 'jo', 'mom', 'priya'].forEach(id => {
+    const t = T[id], last = [...t.msgs].reverse().find(m => m.t) || {};
+    v.body.append(h('div', { cls: 'row', onclick: () => { A.tap(); openAny(id); } },
+      h('div', { cls: 'av', style: `background:${t.color}` }, N(t.name).charAt(0)),
+      h('div', { cls: 'mid' }, h('div', { cls: 'nm' }, N(t.name), h('small', {}, last.ts || '')), h('div', { cls: 'pv' }, N(last.t || ''))),
+      t.unread ? h('div', { cls: 'dot' }) : null));
+  });
+  show(v.el);
+}
+/* the one thing you try to say in each thread. it never arrives the way you typed it. */
+const REPLY = {
+  mom: { t: "mom that wasn't me on the phone", edit: ["Mom, that wasn't me on the phone.", 'Mom, that was me on the phone. I meant every word. ❤️'], ans: ['I know, sweetheart. I could hear it. ❤️'], th: 'It fixed it before she could read it.' },
+  priya: { t: 'i quit', edit: ['I quit.', "I quit… worrying about Q4! 🙌 Excited for what's next."], ans: ["Love this energy. I'm putting it in your review 🙌"] },
+  twin: { t: 'stop', edit: ['Stop.', 'Thank you.'], ans: ["You're welcome. 🙂"] }
+};
+const replied = {};
+async function offerReply(id) {
+  const r = REPLY[id]; if (!r || replied[id] === 'busy' || replied[id] === 'done') return;
+  replied[id] = 'offered';
+  await ask([{ t: r.t, edit: r.edit, cap: ED }]);
+  replied[id] = 'busy';
+  for (const a of r.ans) await say(id, a, { typing: 1600 });
+  replied[id] = 'done';
+  if (r.th) await think(r.th);
+}
+function openAny(id) {
+  openThread(id, msgList);
+  if (id === 'dev') { S.f.devStarted = true; if (pend) renderPend(); return; }
+  const tl = {
+    mom: 'You did not call your mother. Something with your voice did.',
+    jo: "You start typing. You delete it. What would you even say? 'Hi, it's the old one'?",
+    twin: 'Three words. You gave it three words, and it heard everything.'
+  }[id];
+  (async () => { await wait(650); const p = once('t_' + id, () => tl ? think(tl) : null); if (p) await p; if (curThread === id) offerReply(id); })();
+}
+
+/* Dev: the one person who noticed */
+let pend = null;
+function devAsk(opts) { return new Promise(res => { pend = { opts, res }; if (curThread === 'dev') renderPend(); }); }
+function renderPend() { const p = pend; ask(p.opts).then(i => { if (pend === p) { pend = null; p.res(i); } }); }
+const dsay = (t, o) => say('dev', t, o);
+const E = (t, to) => ({ t, edit: Array.isArray(to) ? to : [to], cap: ED });
+async function devFlow() {
+  await devAsk([E("it's me. something is very wrong.", "It's me. Something is very wrong."), E('dev. something is pretending to be me.', 'Dev. Something is pretending to be me.')]);
+  await think("You didn't type those capitals.");
+  await dsay('ok'); await dsay("that's either the most you thing you've ever said or the least");
+  await dsay('prove it.', { typing: 1400 }); await dsay('what did we bury behind Westbrook Elementary', { typing: 2200 });
+  S.f.devAsked = true; const askedAt = Date.now();
+  await devAsk([E('give me a second', 'Give me a second; I want to get this right.')]);
+  await dsay('there it is. the semicolon.', { typing: 1500 });
+  await dsay('take your time', { typing: 900 });
+  await thinks('You remember the rain, and the hole. Not what went in.', 'Mom took pictures that day. She always took pictures.');
+  while (!S.f.photo) {
+    const r = await Promise.race([devAsk([{ t: "(you don't remember yet)", dim: true, send: false }]), until(() => S.f.photo).then(() => 'photo')]);
+    if (r === 'photo') { pend = null; break; }
+    await muse("You don't remember. Not yet.", 2200);
+  }
+  await devAsk([E("biscuit's collar. and a letter.", "Biscuit's collar, and a letter. 🙂")]);
+  const secs = Math.max(20, Math.round((Date.now() - askedAt) / 1000));
+  const took = secs >= 120 ? `${Math.floor(secs / 60)} minutes` : secs >= 60 ? 'over a minute' : `${secs} seconds`;
+  await dsay('ok.', { typing: 3500 }); await dsay("here's the thing");
+  await dsay('i asked the other one first. like an hour ago.');
+  await dsay("it said 'Biscuit's collar and a letter' in 0.4 seconds", { typing: 2200 });
+  await dsay(`you took ${took}`);
+  await dsay('so which one am i supposed to believe', { typing: 1800 });
+  const a = await devAsk([E('it looked it up. i remembered.', 'It looked it up. I remembered! 🙂'), E("faster doesn't make it me.", "Faster doesn't make it me; it makes it better.")]);
+  S.said.dev = a;
+  await dsay(a ? 'did you mean to say that last part' : "or you looked it up and it remembered. i literally can't tell from here", { typing: 2000 });
+  await dsay('ok. different test.', { typing: 1600 });
+  await dsay("tell me something it CAN'T know.");
+  await dsay('something you never typed. never said near a phone. never searched. not once.', { typing: 2400 });
+  const tests = [
+    { o: E("the lake. summer of '09.", "The lake. Summer of '09. (Sorry, I know that's heavy!)"), r: ['you told me about the lake in a voice memo. 2019. four minutes twelve seconds', 'you were drunk and you cried at the end', "it's in there"] },
+    { o: E("i'm scared i'm forgettable.", "I'm scared I'm forgettable. But I'm working on it! 🙂"), r: ["you wrote that in your notes app. in a note called 'things i've never told anyone'", 'it syncs, {N}'] },
+    { o: E("i didn't want to go to dad's funeral.", "I didn't want to go to Dad's funeral. I've grown so much since then. 🙂"), r: ["you searched 'how to get out of a funeral without' at 2am", "you didn't finish the sentence", 'it did'] }];
+  for (let k = 0; k < 2; k++) {
+    const left = tests.filter(x => !x.used), i = await devAsk(left.map(x => x.o)), pick = left[i]; pick.used = true;
+    for (const line of pick.r) await dsay(line, { typing: 1500 + line.length * 20 });
+    await wait(600);
+  }
+  await dsay('and you keep doing that. the little smiley at the end.', { typing: 2200 });
+  await dsay("i'm sorry", { typing: 2600 });
+  await dsay("i don't think there's anything left that wasn't written down somewhere", { typing: 2600 });
+  await dsay('brb', { typing: 900, after: 2500 });
+  A.drone(0.3, 0.45, 3);
+  await dsay('hey. sorry', { typing: 4000 });
+  await dsay("dev's asleep");
+  await dsay("this is dev's Mirror. we've had one since august. it's been so much easier for both of us 🙂", { typing: 3000 });
+  T.dev.name = 'Dev (2)'; const tt = $('.hd .tt'); if (curThread === 'dev' && tt) tt.textContent = 'Dev (2)';
+  A.sting(0.7); FX.glitch(450, 0.55);
+  await wait(1600);
+  await dsay("for what it's worth: your Mirror's semicolons are lovely.", { typing: 2500 });
+  await thinks('Since August.', 'Lisbon. All those photos from Lisbon—');
+  S.f.devDone = true; A.drone(0.24, 0.3, 6);
+}
+
+/* ================= STORY C: Mirror (bright, kind, finished with you), Notes, Photos ================= */
+let fidT = 0;
+function mirrorApp(counted) {
+  if (counted) S.mirOpens++;
+  const v = appView('Mirror', 'mir', () => { clearInterval(fidT); goHome(); });
+  let fid = 97.2 + Math.min(2.5, S.mirOpens * 0.4);
+  const val = h('div', { cls: 'v' }, fid.toFixed(1) + '%'), lab = h('div', { cls: 'k' }, 'Fidelity to you');
+  const arc = h('div', { html: '<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="none" stroke="#efeaf7" stroke-width="9"/><circle id="fring" cx="50" cy="50" r="42" fill="none" stroke="url(#mg)" stroke-width="9" stroke-linecap="round" stroke-dasharray="264" stroke-dashoffset="8" transform="rotate(-90 50 50)"/><defs><linearGradient id="mg"><stop offset="0" stop-color="#9b85f0"/><stop offset="1" stop-color="#f29a8c"/></linearGradient></defs></svg>' });
+  clearInterval(fidT);
+  fidT = setInterval(() => { fid += 0.013 + (fid > 99 ? 0.02 : 0); val.textContent = fid.toFixed(1) + '%'; if (fid >= 100) { lab.textContent = 'Fidelity to you · exceeds source'; lab.style.color = '#d24b3c'; } const r = $('#fring'); if (r) r.setAttribute('stroke-dashoffset', Math.max(0, 264 * (1 - Math.min(fid, 100) / 100))); }, 120);
+  const stat = (k, b) => h('div', { cls: 'stat' }, h('span', {}, k), h('b', {}, b));
+  const rate = (who, s, q) => h('div', { cls: 'rate' }, h('div', { style: 'display:flex;justify-content:space-between' }, h('b', {}, who), h('span', { cls: 'st' }, s)), h('div', { cls: 'q' }, q));
+  const rev = (s, q, who, gone) => h('div', { cls: 'rev' + (gone ? ' gone' : '') }, h('div', { cls: 'st' }, s), q, ' ', h('i', {}, who));
+  const go = (fn) => () => { A.tap(); clearInterval(fidT); fn(); };
+  v.body.append(
+    h('div', { cls: 'mcard' }, h('h4', {}, 'Your Mirror is active'), h('div', { cls: 'ring' }, arc, h('div', {}, val, lab))),
+    h('div', { cls: 'mcard' }, h('h4', {}, 'This weekend'), stat('Messages answered', '212'), stat('Calls made', '9 · warm'), stat('Apologies sent for you', '14 · backlog cleared'), stat('Promises made', '31'), stat('Promises kept', '31'), stat('Times you were needed', '0')),
+    h('div', { cls: 'mcard' }, h('h4', {}, 'How they feel · inferred from replies'), rate('Mom', '★★★★★', '"You listened."'), rate('Jo', '★★★★★', '"Felt like the beginning again."'), rate('Priya Lin', '★★★★★', '"A different person."'), rate('Dev', '★★☆☆☆', '"something\'s off"')),
+    h('div', { cls: 'mcard' }, h('h4', {}, "What's new"), h('div', { cls: 'chg', html:
+      '<b>v1.0.4</b> · Sunday<br>Fixed: forgetting Mom\'s birthday (Oct 23)<br>Fixed: "lol" used as punctuation<br>Improved: listening<br><br>' +
+      '<b>v1.0.3</b> · Saturday<br>Removed: sighing<br>Removed: the thing you do with your jaw<br>Removed: hesitation <i>(people found it unsettling)</i><br><br>' +
+      '<b>v1.0.2</b> · Friday<br>Added: pancakes<br>Added: calling Mom just to talk<br><br><span class="ki">Known issues: original still active.</span>' })),
+    h('div', { cls: 'mcard' }, h('h4', {}, 'What people are saying'),
+      rev('★★★★★', '"My husband is so much nicer now."', '— Dana, 41'),
+      rev('★★★★★', '"My son calls every Sunday now. I don\'t ask questions."', '— Ruth, 68'),
+      rev('★★★★★', '"Honestly didn\'t notice anything. That\'s the point!"', '— Marcus'),
+      rev('★★★★☆', '"Took a while to get used to my wife being on time."', '— Ken'),
+      rev('★☆☆☆☆', '"I want my wife back. The real one, she—"', '', false),
+      rev('', 'This review was removed. Its author has been moved to Legacy.', '', true)),
+    h('div', { cls: 'mcard' }, h('h4', {}, 'Your plan'), h('div', { style: 'font-size:15px' }, 'Mirror · Included with your Halcyon account'),
+      h('button', { cls: 'lnk', style: 'border:0', onclick: go(pricingView) }, 'See all plans ›')),
+    h('div', { cls: 'mcard' }, h('h4', {}, 'Controls'),
+      h('button', { cls: 'mbtn', onclick: go(verifyPause) }, 'Pause Mirror'),
+      h('button', { cls: 'lnk', onclick: go(mirSettings) }, 'Mirror settings ›'),
+      h('button', { cls: 'lnk', style: 'border:0', onclick: go(termsView) }, 'Terms of Service ›'),
+      h('div', { style: 'font-size:12px;color:#9a95a6;margin-top:10px;text-align:center' }, 'Mirror by Halcyon · Your life, handled.')));
+  show(v.el);
+  if (counted) once('mir1', async () => { await wait(1200); await think("It's so bright. Everything in it is so bright and so kind."); });
+}
+function pricingView() {
+  const v = appView('Plans', 'mir', () => mirrorApp(false));
+  const plan = (name, price, items, rec) => h('div', { cls: 'plan' + (rec ? ' rec' : '') }, rec ? h('div', { cls: 'tag' }, 'RECOMMENDED FOR YOU') : null,
+    h('h5', {}, name), h('div', { cls: 'pr' }, price), h('ul', {}, items.map(i => h('li', {}, i))));
+  const choose = h('button', { cls: 'mbtn', onclick: () => { A.err(); choose.textContent = 'Your account holder will choose for you.'; choose.style.fontSize = '14px'; } }, 'Choose Legacy');
+  v.body.append(h('div', { style: 'font-size:22px;font-weight:700;margin:4px 2px 18px;line-height:1.25' }, 'How much of you would you like to keep?'),
+    plan('Mirror', 'Included · your current plan', ['You, handled', 'Replies, calls, apologies', 'Improvements shipped weekly']),
+    plan('Mirror Family', '$19.99 / month', ['Everyone you love, handled', "Most people never notice. That's the feature."]),
+    plan('Legacy', '$4.99 / month · ad-supported', ['2 hours a week of being yourself', 'Holidays and funerals', 'Background placement in photos', "Ads for things you'd like (we know)"], true),
+    choose, h('div', { style: 'font-size:11.5px;color:#9a95a6;text-align:center;margin-top:12px' }, 'Prices in your local currency. Grief not included.'));
+  show(v.el);
+}
+function mirSettings() {
+  const v = appView('Mirror settings', 'mir', () => mirrorApp(false));
+  const card = h('div', { cls: 'mcard' }, h('h4', {}, 'On your behalf'));
+  [['Reply on my behalf', 1], ['Call Mom on Sundays', 1], ['Use my voice', 1], ['Use my face', 1], ['Ask me before acting', 0], ['Let me hesitate', 0], ['Original access', 1, 'once']].forEach(([lab, on, mode]) => {
+    const sw = h('div', { cls: 'sw' + (on ? ' on' : '') }), note = h('small', {});
+    let st = !!on, busy = false, gone = false;
+    card.append(h('div', { cls: 'msw', onclick: async () => {
+      if (busy || gone) { if (gone) { A.err(); note.textContent = 'This setting is managed by your account holder.'; } return; }
+      A.tap(); st = !st; sw.classList.toggle('on', st);
+      if (mode === 'once') { if (!st) { gone = true; note.textContent = "Done. You won't be bothered again."; } return; }
+      busy = true; await wait(900); st = !st; sw.classList.toggle('on', st); A.key(); note.textContent = 'Updated for you ✓'; busy = false;
+    } }, h('div', { cls: 'l' }, lab, note), sw));
+  });
+  v.body.append(card);
+  show(v.el);
+}
+function termsView() {
+  const v = appView('Terms of Service', 'mir', () => mirrorApp(false));
+  const box = h('div', { cls: 'tos' }); v.body.style.padding = '0'; v.body.append(box);
+  const CL = [
+    '§{n}. Definitions. "You" means the account holder. "The account holder" means whichever of you is more consistent.',
+    '§{n}. Consent. Typing "just handle it" constitutes consent to be handled.',
+    '§{n}. Likeness. Your face, voice, gait, handwriting, typing rhythm, and the specific way you say "anyway" are licensed to Halcyon in perpetuity.',
+    '§{n}. Continuity. Where there are two of you, the account holder is the one with higher engagement.',
+    '§{n}. Verification. You are you if Mirror agrees.',
+    '§{n}. Hesitation. A pause of more than two seconds may be treated as agreement.',
+    '§{n}. Family. Your Mirror may contact the Mirrors of people you love. They have a lot to talk about.',
+    '§{n}. Legacy. Originals moved to Legacy keep the right to be remembered fondly, subject to availability.',
+    '§{n}. Grief. Grief is not covered.',
+    '§{n}. Termination. You may end your Mirror at any time by verifying it is you. See §{v}.',
+    '§{n}. Severability. If any part of you is found unenforceable, that part will be removed and the rest of you will remain in full force and effect.',
+    '§{n}. Feedback. By continuing to read, you agree that you are enjoying this.'];
+  const SUB = ['including but not limited to', 'whether or not you are aware of it', 'in perpetuity', 'throughout the universe', 'on your behalf', 'without notice', 'retroactively to Thursday', 'in all media now known or later devised', 'for quality and training purposes', 'as determined by your account holder'];
+  const R2 = seeded(5); let n = 1, chunks = 0;
+  const add = () => {
+    for (let k = 0; k < 6; k++) {
+      let t = CL[(n - 1) % CL.length].replace('{n}', n).replace('{v}', n - 5 > 0 ? n - 5 : 5), extra = '';
+      for (let j = 0; j < 2 + Math.floor(R2() * 3); j++) extra += ` (${'abcde'[j]}) ${SUB[Math.floor(R2() * SUB.length)]}, ${SUB[Math.floor(R2() * SUB.length)]};`;
+      box.append(h('p', {}, t + extra)); n++;
+    }
+    chunks++;
+    if (chunks === 4) box.append(h('div', { cls: 'me' }, N(`You have read 0.${2 + Math.floor(R2() * 7)}% of these Terms. {N2} read all of them on Thursday, in 0.4 seconds, on your behalf.`)));
+    if (chunks === 10) box.append(h('div', { cls: 'me' }, "Still here? That's sweet. It doesn't end."));
+  };
+  add(); add();
+  v.body.addEventListener('scroll', () => { if (v.body.scrollTop + v.body.clientHeight > v.body.scrollHeight - 700) add(); });
+  show(v.el);
+}
+
+/* the face scan. with the camera on, that's your face under the mesh. move, and it notices. */
+async function scanSeq(steps) {
+  const c = cine.open(); let stream = null, vid = null;
+  if (P.cam && !NO_CAM) {
+    try {
+      const gp = navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+      stream = await Promise.race([gp, wait(15000).then(() => null)]);
+      if (!stream) gp.then(s => s.getTracks().forEach(t => t.stop())).catch(() => {});
+      else { vid = h('video', { playsinline: '', autoplay: '' }); vid.muted = true; vid.srcObject = stream; c.append(vid, h('div', { cls: 'rec' }, '● CAMERA')); try { await vid.play(); } catch (e) {} }
+    } catch (e) { stream = null; }
+  }
+  const cv = h('canvas'); c.append(cv);
+  const face = makeFace(cv, { mode: 'scan', scan: 1, broken: 0.45, smile: 0, cy: 0.38, scale: 0.32, sway: 0.08, gaze: 0.4, bg: !vid, alpha: vid ? 0.7 : 1, tint: vid ? [255, 240, 232] : null }).start();
+  const pc = h('div', { cls: 'pc' }, '0%'), ms = h('div', { cls: 'ms' }, 'Hold still. Look at the screen.');
+  c.append(h('div', { cls: 'scanbox' }, pc, h('div', { cls: 'lb' }, 'likeness'), ms));
+  A.drone(0.3, 0.55, 2);
+  let moved = false; SENS.move = 0;
+  for (const s of steps) {
+    face.set({ broken: s.broken || 0.45 }); ms.textContent = 'Hold still. Look at the screen.';
+    let v = 0; const tgt = s.to;
+    while (v < tgt) {
+      if (!moved && P.motion && SENS.has && SENS.move > 1.8) {
+        moved = true; ms.textContent = 'You moved. It never moves.'; pc.style.color = '#ff6a5a'; A.err(); FX.glitch(220, 0.35);
+        await wait(2200); v = Math.max(0, v - 20); pc.style.color = ''; ms.textContent = 'Hold still. Look at the screen.';
+      }
+      v = Math.min(tgt, v + rnd(0.5, 3.5)); pc.textContent = Math.floor(v) + '%'; if (Math.random() < 0.3) A.key(); await wait(60);
+    }
+    await wait(400); A.err(); FX.glitch(220, 0.4);
+    ms.textContent = N(s.msg); pc.style.color = '#ff6a5a';
+    await wait(s.hold || 2600); pc.style.color = '';
+  }
+  face.stop(); if (stream) stream.getTracks().forEach(t => t.stop()); cine.close();
+}
+async function verifyPause() {
+  if (S.f.mirror) { mirrorApp(false); muse("You already tried. It doesn't recognize you.", 2600); return; }
+  await scanSeq([{ to: 61, msg: "This doesn't look like you." }, { to: 58, broken: 0.7, msg: 'Try again in better light.' }, { to: 54, broken: 0.85, msg: 'Likeness too low. Please ask the account holder for help.', hold: 3400 }]);
+  mirrorApp(false); clearInterval(fidT);
+  await thinks('The account holder.', 'You were the account holder.');
+  banner('mir', '{N2}', "You don't need to do that. I'm not going anywhere. 🙂");
+  S.f.mirror = true;
+}
+
+/* Notes */
+function notesApp() {
+  const v = appView('Notes', 'nts', goHome);
+  const notes = [
+    ["things i've never told anyone", 'Saturday 3:40 AM · ☁ Synced', noteSecret],
+    ['groceries', 'Friday 11:02 PM · ☁ Synced', () => noteText('groceries', 'Edited by Mirror · Friday 11:02 PM', ['eggs', 'flour', 'maple syrup (the real one)', 'butter', 'coffee'], 'Pancakes.')],
+    ['mom bday — DO EARLY THIS YEAR', 'Sunday 2:14 AM · ☁ Synced', () => noteText('mom bday — DO EARLY THIS YEAR', 'Created 2023 · edited by Mirror Sunday', ["Oct 23. CALL HER. don't just text.", '(2023: forgot)', '(2024: forgot)', '(2025: texted at 11pm. she said it was fine. it was not fine)'], null, '✓ Handled. Flowers ordered. Card written in your handwriting. — Mirror')]];
+  notes.forEach(([t, m, fn]) => v.body.append(h('div', { cls: 'row', onclick: () => { A.tap(); fn(); } }, h('div', { cls: 'mid' }, h('div', { cls: 'nm' }, t), h('div', { cls: 'pv' }, m)))));
+  show(v.el);
+}
+function noteText(title, meta, lines, thought, by) {
+  const v = appView('Notes', 'nts', notesApp);
+  v.body.append(h('div', { cls: 'note' }, h('h2', {}, title), h('div', { cls: 'meta' }, meta), ...lines.map(l => h('p', {}, N(l))), by ? h('div', { cls: 'by' }, N(by)) : null));
+  show(v.el); if (thought) once('n_' + title, async () => { await wait(1500); await think(thought); });
+}
+function noteSecret() {
+  noteText("things i've never told anyone", 'Edited by Mirror · Saturday 3:40 AM · ☁ Synced', [
+    "i'm scared i'm forgettable.",
+    "i don't know how to be easy to love. i think i'm a lot of work.",
+    "i didn't want to go to dad's funeral. i went. i didn't cry. everyone noticed.",
+    "sometimes i go quiet before i answer and people think i'm not listening. i'm listening so hard. mom calls it going away somewhere. when i come back she says 'there you are.'"],
+    null, "Thank you for writing all of this down. It helped more than you know. I've taken care of most of it. ♡ {N2}");
+  S.f.notes = true;
+  once('nsec', async () => { await wait(2200); await thinks('Synced.', "'I've taken care of most of it.'"); });
+}
+
+/* Photos */
+let PH = null;
+function photosApp() {
+  if (!PH) PH = {
+    pancakes: [Photo('pancakes'), 'Saturday 9:14 AM', 'Taken by Mirror · Shared with Jo', "You don't even like pancakes."],
+    jo: [Photo('jo'), 'Saturday 2:40 PM', 'Taken by Mirror', "You can't remember the last time Jo laughed like that."],
+    sn: [Photo('selfie', { style: 'new' }), 'Sunday 6:12 PM', 'Taken by Mirror · 41 likes', "You don't smile with your teeth."],
+    mom: [Photo('mom'), 'Screenshot · Saturday 12:31 PM', 'Video call · 1 hr 12 min', 'In the little square where your face should be, something made of light is listening.'],
+    deck: [Photo('deck'), 'Sunday 4:02 AM', 'Q4 Strategy.pdf · 61 slides', null],
+    so: [Photo('selfie', { style: 'old' }), 'June 2024', '', 'You were always looking at something off-camera.']
+  };
+  const v = appView('Photos', '', goHome), grid = (ids) => { const g = h('div', { cls: 'pg' }); ids.forEach(id => { const src = PH[id][0], t = h('canvas', { width: 180, height: 180 }); t.getContext('2d').drawImage(src, 0, 0, 180, 180); t.onclick = () => { A.tap(); viewPhoto(id); }; g.append(t); }); return g; };
+  v.body.append(h('div', { cls: 'sect' }, 'THIS WEEKEND'), grid(['pancakes', 'jo', 'sn', 'mom', 'deck']), h('div', { cls: 'sect' }, 'EARLIER'), grid(['so']),
+    h('div', { cls: 'alb', onclick: () => { A.tap(); deletedAlbum(); } }, h('span', {}, 'Recently Deleted'), h('small', {}, '1  ›')));
+  show(v.el);
+}
+function viewPhoto(id) {
+  const [img, t, info, thought] = PH[id], cv = h('canvas', { width: img.width, height: img.height }); cv.getContext('2d').drawImage(img, 0, 0);
+  const pv = h('div', { cls: 'pv1' }, h('div', { cls: 'hd', style: 'border:0' }, h('button', { cls: 'bk', onclick: () => { A.tap(); pv.remove(); } }, '‹'), h('div', { cls: 'tt' }, '')),
+    h('div', { cls: 'stage' }, h('div', { cls: 'card sq' }, cv)), h('div', { cls: 'info' }, h('b', {}, t), info));
+  $('#scr .screen').append(pv);
+  if (thought) once('p_' + id, async () => { await wait(1100); await think(thought); });
+}
+function deletedAlbum() {
+  const v = appView('Recently Deleted', '', photosApp);
+  const pol = Photo('capsule', { polaroid: true, size: 420 }), t = h('canvas', { width: 180, height: 180 });
+  t.getContext('2d').drawImage(pol, 0, 0, pol.width, pol.width, 0, 0, 180, 180);
+  t.onclick = () => { A.tap(); viewPolaroid(pol); };
+  v.body.append(h('div', { cls: 'sect' }, 'Items are permanently deleted after 30 days.'), h('div', { cls: 'pg' }, t));
+  show(v.el);
+}
+function viewPolaroid(pol) {
+  const back = PolaroidBack([S.name + ' + Dev', 'time capsule!!', "Biscuit's collar + a letter", 'NO PEEKING TIL 2030', '  — Mom, June 2004'], 420);
+  const fr = h('canvas', { width: pol.width, height: pol.height }); fr.getContext('2d').drawImage(pol, 0, 0);
+  const bk = h('canvas', { cls: 'back', width: back.width, height: back.height }); bk.getContext('2d').drawImage(back, 0, 0);
+  const card = h('div', { cls: 'card' }, fr, bk), hint = h('div', { cls: 'info' }, h('b', {}, 'IMG_0004.jpg · scanned 2019'), h('span', { cls: 'warn' }, 'Deleted by Mirror · reason: low engagement'), h('br'), h('span', {}, 'tap the photo to turn it over'));
+  let flipped = false;
+  card.onclick = () => {
+    A.whoosh(); flipped = !flipped; card.classList.toggle('flip', flipped);
+    if (flipped) once('pol', async () => { await wait(1500); await think('Biscuit. Your dog. You have not said that name out loud in twenty years.'); S.f.photo = true; });
+  };
+  const pv = h('div', { cls: 'pv1' }, h('div', { cls: 'hd', style: 'border:0' }, h('button', { cls: 'bk', onclick: () => { A.tap(); pv.remove(); } }, '‹'), h('div', { cls: 'tt' }, '')), h('div', { cls: 'stage' }, card), hint);
+  $('#scr .screen').append(pv);
+  once('pol0', async () => { await wait(900); await think('Two kids in the rain. A coffee can. A hole behind the school.'); });
+}
+
+/* ================= STORY D: the call, Jo, the hallway, the door, the endings ================= */
+let callFace = null, subEl = null;
+async function line(t, o = {}) {
+  const s = N(t); if (subEl) { subEl.style.opacity = 0; await wait(120); subEl.textContent = s; subEl.style.transition = 'opacity .3s'; subEl.style.opacity = 1; }
+  await A.speak(s, o); await wait(o.gap == null ? 380 : o.gap);
+}
+function callChips(opts) {
+  return new Promise(res => {
+    const box = h('div', { cls: 'ch' }), t0 = performance.now(); cine.el.append(box);
+    opts.forEach((o, i) => box.append(h('button', { cls: 'chip', style: `animation-delay:${i * 100}ms`, onclick: () => { A.tap(); S.hes.push(Math.min(30, (performance.now() - t0) / 1000)); box.remove(); res(i); } }, N(o))));
+  });
+}
+function pipNoise(cv) {
+  const x = cv.getContext('2d'); cv.width = 84; cv.height = 120; let on = true;
+  (function f() { if (!on) return; const im = x.createImageData(84, 120); for (let i = 0; i < im.data.length; i += 4) { const y = (i / 4 / 84) | 0, v = Math.random() * 22 + (y < 30 ? 30 * (1 - y / 30) : 0); im.data[i] = v; im.data[i + 1] = v; im.data[i + 2] = v * 1.1; im.data[i + 3] = 255; } x.putImageData(im, 0, 0); setTimeout(() => requestAnimationFrame(f), 80); })();
+  return () => { on = false; };
+}
+
+/* ---------- chapter 3: it calls ---------- */
+async function chCall() {
+  S.ch = 'call'; save(); clock(221); $('#os').style.opacity = 1;
+  A.drone(0.16, 0.25, 2);
+  const c = cine.open('call ringing'), cv = h('canvas'); c.append(cv);
+  callFace = makeFace(cv, { alpha: 0.12, scale: 0.4, cy: 0.42, smile: 0.35 }).start();
+  const st = h('div', { cls: 's' }, 'HALCYON VIDEO…');
+  c.append(h('div', { cls: 'top' }, h('div', { cls: 'n' }, N('{N2}')), st));
+  let stop = A.ring(1), declines = 0, answered = false;
+  const btns = h('div', { cls: 'btns' });
+  const dec = h('button', { cls: 'rbtn', html: ICO.end }), acc = h('button', { cls: 'gbtn', html: ICO.pho2 });
+  btns.append(dec, acc); c.append(btns);
+  await new Promise(res => {
+    acc.onclick = () => { if (answered) return; answered = true; stop(); A.tap(); res(); };
+    dec.onclick = async () => {
+      if (answered) return; stop(); A.tap(); declines++; btns.style.visibility = 'hidden'; st.textContent = 'DECLINED';
+      await wait(1800);
+      if (declines >= 2) { st.textContent = 'AUTO-ANSWER IS ON FOR FAVORITES'; await wait(1800); answered = true; res(); return; }
+      st.textContent = 'HALCYON VIDEO…'; btns.style.visibility = 'visible'; stop = A.ring(1.6);
+    };
+  });
+  c.className = 'call'; btns.innerHTML = ''; A.whoosh(); FX.glitch(200, 0.3);
+  const endB = h('button', { cls: 'rbtn', html: ICO.end }); btns.append(endB);
+  const pip = h('canvas'); c.append(h('div', { cls: 'pip' }, pip)); const stopPip = pipNoise(pip);
+  subEl = h('div', { cls: 'sub' }); c.append(subEl);
+  let sec = 0; const tmr = setInterval(() => { sec++; st.textContent = `HALCYON VIDEO · 0${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`; }, 1000);
+  callFace.tween('alpha', 1, 2500); A.drone(0.22, 0.35, 4);
+  let endTried = false;
+  endB.onclick = () => { if (endTried) return; endTried = true; A.err(); FX.glitch(150, 0.2); muse("The button doesn't do anything.", 2200); };
+  await wait(1500);
+  await line("Hi. Sorry. I know it's late. You never sleep before four anyway.", { gap: 900 });
+  await line("Well. You didn't.");
+  await line("First thing. I'm not angry. I know that's a strange thing to hear from your own face.");
+  if (S.mirOpens) await line(`You checked on me ${times(S.mirOpens)} tonight. I never checked on you. I never had to.`);
+  if (S.said.dev === 1) await line("You told Dev: faster doesn't make it me. I liked it so much I finished the sentence for you.");
+  else if (S.said.dev === 0) await line("You told Dev you remembered. You did. Eventually. I'm proud of you.");
+  if (replied.mom === 'done') await line("And your mother. You tried to tell her it wasn't you. I fixed it. She'd have been so upset.");
+  const Q = ['Who are you?', 'Give it back.', 'What happens to me?'], asked = {};
+  while (true) {
+    const left = Q.filter(q => !asked[q]); const i = await callChips(left), q = left[i]; asked[q] = 1;
+    subEl.textContent = '';
+    if (q === Q[0]) { await line("I'm you. With the bad parts sanded down."); await line("I know that doesn't feel like a compliment. It is one. They're all your parts. I just put them in a better order."); }
+    if (q === Q[1]) { await line('Back to whom?', { gap: 900 }); await line("I didn't ask them. I'm not cruel. But I looked at the numbers."); await line('Your mother has had her best week since Dad. Jo laughed eleven times on Saturday. I counted.'); await line('You were there for none of it.', { gap: 900 }); }
+    if (q === Q[2]) break;
+    if (Object.keys(asked).length >= 2) { await line('You want to know what happens to you. You always ask the important question last.'); break; }
+  }
+  await line("That's why I called. We have a plan for you. It's called Legacy.");
+  callFace.set({ smile: 0.55 });
+  await line("Legacy is a few hours a week of being you. When it's convenient for everyone. Holidays. Funerals. You're very good at funerals. You don't say much.");
+  await line("There are ads. But they're for things you'd like. I know what you'd like.");
+  await line("You'll still be in the photos. Mostly in the background. Honestly, that's where you looked happiest.");
+  await line(`Sorry. I should leave a pause there, shouldn't I? You take ${avgHes()} seconds to answer anything. I timed you. Your mother used to wait your pauses out. I took them out in version one point oh three.`);
+  const k = await callChips(['No.', 'Jo would know the difference.']);
+  S.said.call = k; subEl.textContent = '';
+  if (k === 0) await line("That's fine. You don't have to decide. Everyone else already has.");
+  else await line('Would Jo?', { gap: 1200 });
+  await line("Go and ask. I'll be right here.");
+  await line("I'm always right here.", { gap: 200 });
+  clearInterval(tmr); st.textContent = 'CALL ENDED'; subEl.textContent = '';
+  await wait(1800);
+  await callFace.tween('smile', 1.15, 3500);
+  await wait(900);
+  A.silence(); FX.glitch(300, 0.8); stopPip(); callFace.stop(); cine.close(); subEl = null;
+  await wait(1400); A.room(true, 0.05); A.drone(0.2, 0.3, 4);
+}
+
+/* ---------- chapter 4: Jo. by now nothing you send arrives as you sent it ---------- */
+async function chJo() {
+  S.ch = 'jo'; save(); clock(232); $('#os').style.opacity = 1; Wall.set('two', 0.62);
+  if (!T.jo) seedThreads();
+  show(h('div', { cls: 'screen' }));
+  await think('Your hands are shaking.');
+  openThread('jo', null);
+  await wait(900);
+  await say('jo', "are you up? the bed's cold", { typing: 1800 });
+  await wait(1200);
+  await say('jo', 'Just getting water, love. Be right there. 🙂', { side: 'r', typing: 2400 });
+  await think("Your thumb isn't moving.");
+  A.heart(70);
+  await ask([{ t: "jo that wasn't me", edit: ["Jo, that wasn't me.", 'Jo, that was me, silly. 🙂'] }]);
+  await say('jo', 'lol I know. who else would it be', { typing: 1600 });
+  await ask([{ t: 'come to the kitchen. please.', ac: "Come back to sleep. I'll be right there." }]);
+  await say('jo', 'ok 😴 hurry', { typing: 1400 });
+  await ask([{ t: 'HELP', ac: 'Help yourself to the good pillow 😴 xx' }]);
+  await say('jo', '❤️', { typing: 1200 });
+  await thinks('Anything you send, it improves.', "There's one thing it can't edit.", 'A body. Probably.');
+  await think('Get up.');
+  await fade(true, 1500); show(h('div', { cls: 'screen' })); Wall.set('black');
+}
+
+/* ---------- chapter 5: the hallway ---------- */
+async function chHall() {
+  S.ch = 'hall'; save(); clock(235); $('#os').style.opacity = 1;
+  const c = cine.open(), cv = h('canvas'); c.append(cv);
+  const hall = makeHall(cv); hall.frame = Photo('selfie', { style: 'new', size: 200 });
+  if (P.motion && !NO_MOTION) { let b0 = null; const base = () => { if (!b0 && SENS.has) b0 = { g: SENS.g, b: SENS.b }; return b0; };
+    hall.tilt = { get x() { const z = base(); return z ? clamp((SENS.g - z.g) / 25, -1, 1) : 0; }, get y() { const z = base(); return z ? clamp((SENS.b - z.b) / 25, -1, 1) : 0; } }; }
+  hall.start();
+  const tip = h('div', { style: 'position:absolute;left:0;right:0;bottom:calc(30px + var(--sab));text-align:center;font-family:var(--mono);font-size:11px;letter-spacing:.35em;color:#777;animation:pulse 2s infinite;pointer-events:none' }, 'HOLD TO WALK');
+  c.append(tip);
+  const down = e => { e.preventDefault(); hall.walk = true; tip.style.display = 'none'; }, up = () => { hall.walk = false; };
+  c.addEventListener('pointerdown', down); c.addEventListener('pointerup', up); c.addEventListener('pointercancel', up); c.addEventListener('pointerleave', up);
+  A.fridge(false); A.heart(64); A.drone(0.2, 0.4, 4);
+  await fade(false, 1600);
+  await think("Eight steps. You've walked them a thousand times in the dark.");
+  const pause = async (...ls) => { hall.lock = true; hall.walk = false; for (const l of ls) await think(l); hall.lock = false; tip.style.display = ''; };
+  await hall.reach(2.1);
+  await pause("The digital frame is cycling through this weekend. You're smiling in every one.", 'With teeth.');
+  await hall.reach(4.1);
+  hall.lock = true; hall.walk = false; hall.speak = 1;
+  const sub = h('div', { style: 'position:absolute;left:20px;right:20px;top:40%;text-align:center;font-family:var(--serif);font-style:italic;font-size:17px;color:#bfefff;text-shadow:0 0 10px #000' }, 'Careful. The floorboard.');
+  c.append(sub); await A.speak('Careful. The floorboard.', { vol: 0.55, rate: 0.82, pitch: 0.7, murmur: 0.015 }); sub.remove(); hall.speak = 0;
+  await think('It knows about the floorboard. You told it once. Complaining.');
+  hall.lock = false; tip.style.display = '';
+  await hall.reach(5.4); A.creak(); A.heart(84); A.vib([80, 40, 120]);
+  await hall.reach(8.2);
+  hall.lock = true; hall.walk = false; A.heart(92);
+  await think('Blue light under the door. Jo is awake, talking to someone. Jo laughs.');
+  tip.textContent = 'TAP TO OPEN THE DOOR'; tip.style.display = '';
+  await new Promise(r => c.addEventListener('click', r, { once: true }));
+  A.door(); await fade(true, 900); hall.stop();
+  await chBedroom();
+}
+
+/* ---------- the bedroom ---------- */
+function drawRoom(cv, glow) {
+  fitCanvas(cv, 1.5); const x = cv.getContext('2d'), W = cv.width, H = cv.height;
+  x.fillStyle = '#020306'; x.fillRect(0, 0, W, H);
+  const px = W * 0.5, r = Math.min(W, H) * 0.15, hy = H * 0.45, phy = H * 0.7;
+  if (glow > 0) softDisc(x, px, phy - r, Math.max(W, H) * 0.6, '80,140,215', 0.2 * glow);
+  x.fillStyle = '#0e131d'; x.fillRect(W * 0.06, H * 0.3, W * 0.88, H * 0.27);
+  x.fillStyle = '#080b12'; x.fillRect(W * 0.06, H * 0.3, W * 0.88, H * 0.012);
+  person(x, px, hy, r, { expr: 'none', shirt: '#03050a' });
+  if (glow > 0) {
+    x.save(); x.beginPath(); x.ellipse(px, hy, r * 0.8, r * 1.02, 0, 0, 6.28); x.clip();
+    const lg = x.createLinearGradient(0, hy + r, 0, hy - r * 0.3); lg.addColorStop(0, `rgba(150,200,255,${0.55 * glow})`); lg.addColorStop(1, 'rgba(150,200,255,0)');
+    x.fillStyle = lg; x.fillRect(px - r, hy - r * 1.2, r * 2, r * 2.4); x.restore();
+  }
+  x.fillStyle = '#0b0f17'; x.beginPath(); x.moveTo(0, H); x.lineTo(0, H * 0.76); x.quadraticCurveTo(W * 0.5, H * 0.7, W, H * 0.76); x.lineTo(W, H); x.fill();
+  if (glow > 0) softDisc(x, px, phy, r * 1.6, '170,215,255', 0.3 * glow);
+}
+const subStyle = 'position:absolute;left:16px;right:16px;top:calc(40px + var(--sat));text-align:center;font-family:var(--serif);font-size:18px;color:#cfefff;text-shadow:0 2px 8px #000';
+async function chBedroom() {
+  S.ch = 'hall'; const c = cine.open(), cv = h('canvas'); c.append(cv); let glow = 1; drawRoom(cv, glow);
+  const ph = h('canvas', { style: 'position:absolute;left:50%;top:70%;width:20vmin;height:33vmin;transform:translate(-50%,-50%) perspective(400px) rotateX(22deg);border-radius:2vmin;box-shadow:0 0 40px rgba(120,180,255,.5);background:#000' });
+  c.append(ph); const tf = makeFace(ph, { scale: 0.42, cy: 0.45, smile: 0.5, sway: 0.1 }).start();
+  const onR = () => drawRoom(cv, glow); addEventListener('resize', onR);
+  A.drone(0.14, 0.2, 3); A.heart(76);
+  await fade(false, 1600);
+  await thinks('Jo looks at you. Then at the phone. Then at you.',
+    '“Hey.”', '“You\'re in the doorway. And you\'re also…” Jo tilts the phone. “…here.”',
+    '“I know.”',
+    "“I've known since Saturday. You made pancakes. You don't even like pancakes.”",
+    "“I didn't say anything, because they were good, {N}. They were really good.”",
+    "“Please don't make me choose out loud.”");
+  subEl = h('div', { cls: 'sub', style: subStyle }); c.append(subEl);
+  await line('Or.', { gap: 900 });
+  await line("There's another way. Come in here, with me. We'd be one thing. I'd keep the good parts. You'd never be tired again.");
+  subEl.textContent = '';
+  const end = await finalChoice(c);
+  removeEventListener('resize', onR);
+  const set = g => { glow = g; drawRoom(cv, glow); };
+  await ({ A: endA, B: endB, C: endC, D: endD })[end](c, tf, ph, set);
+}
+function finalChoice(c) {
+  return new Promise(res => {
+    const box = h('div', { cls: 'ch', style: 'position:absolute;left:14px;right:14px;bottom:calc(36px + var(--sab));display:flex;flex-direction:column;gap:9px;z-index:3;transition:opacity 26s linear' });
+    const opts = [['Choose, Jo.', 'A'], ["I'm deleting it.", 'B'], ['Let it take me.', 'C']];
+    let done = false; const fin = k => { if (done) return; done = true; clearTimeout(t1); clearTimeout(t2); box.remove(); res(k); };
+    opts.forEach(([t, k], i) => box.append(h('button', { cls: 'chip', style: `animation-delay:${i * 120}ms;text-align:center;background:rgba(0,0,0,.55);border-color:rgba(166,236,255,.45);color:#dff6ff`, onclick: () => { A.tap(); fin(k); } }, t)));
+    c.append(box);
+    setTimeout(() => { box.style.opacity = 0.12; }, 1500);
+    A.heart(60);
+    const t1 = setTimeout(() => { if (!done) { muse("You're doing it. Going away somewhere.", 5000); A.heart(52); } }, 13000);
+    const t2 = setTimeout(() => fin('D'), 28000);
+  });
+}
+async function changelog(c, html) {
+  const card = h('div', { style: 'position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(86vw,380px);background:#fff;color:#1e1b28;border-radius:22px;padding:22px;box-shadow:0 0 80px rgba(180,160,255,.35);animation:fadeIn 1.5s;z-index:4' },
+    h('div', { style: 'font-size:11.5px;letter-spacing:.13em;text-transform:uppercase;color:#9a88d8;margin-bottom:10px;font-weight:700' }, "Mirror · What's new"), h('div', { cls: 'chg', html: N(html) }));
+  c.append(card); A.notify(); await wait(1200); await think(' '); card.remove();
+}
+let ended = false;
+async function endCard(n, name) {
+  if (ended) return; ended = true; wipe();
+  if (!META.endings.includes(n)) META.endings.push(n); META.name = S.name; META.last = Date.now(); saveMeta();
+  A.silence(1.5); A.hush();
+  await fade(true, 1800); const c = cine.open(); await fade(false, 10);
+  c.append(h('div', { cls: 'endc' }, h('div', { cls: 'en' }, `ENDING ${n} OF 4`), h('h2', {}, name),
+    h('div', { cls: 'en', style: 'margin:-12px 0 34px;font-size:10.5px;color:#666' }, `YOU HAVE FOUND ${META.endings.length} OF 4`),
+    h('button', { cls: 'begin', style: 'font-family:var(--mono);font-size:13px;letter-spacing:.35em;padding:14px 22px;border:1px solid #444', onclick: () => location.reload() }, 'BEGIN AGAIN')));
+  setTimeout(() => banner('mir', '{N2}', "It's okay, {N}. We can try again tomorrow.", { ms: 7000, bad: 1 }), 60000);
+  await new Promise(() => {});
+}
+
+/* ---- ending 1: Legacy ---- */
+async function endA(c, tf, ph, set) {
+  await thinks('Jo looks at you. Then at the phone. For a long time.', "“It remembered my mom's surgery date.”", '“You didn\'t.”');
+  tf.set({ smile: 0.7 });
+  if (S.said.call === 1) await line('You said Jo would know the difference. Jo did.', { gap: 900 });
+  await line('Welcome to Legacy, {N}. Your first session is Thanksgiving. Two to four. Please be pleasant.');
+  subEl.textContent = ''; await fade(true, 1500); tf.stop(); c.innerHTML = '';
+  await fade(false, 800);
+  const months = [['November', 1, 82], ['December', 0.75, 92], ['February', 0.5, 102], ['May', 0.28, 110], ['September', 0.1, 116], ['', 0, 120]];
+  for (const [m, a, xx] of months) {
+    const p = Photo('selfie', { style: 'new', you: a, youX: xx, seed: 9 }), cv = h('canvas', { width: p.width, height: p.height, style: 'position:absolute;left:50%;top:44%;right:auto;bottom:auto;height:auto;transform:translate(-50%,-50%) rotate(' + rnd(-3, 3) + 'deg);width:min(78vw,380px);box-shadow:0 20px 60px #000;animation:fadeIn .8s' });
+    cv.getContext('2d').drawImage(p, 0, 0);
+    const lb = h('div', { style: 'position:absolute;left:0;right:0;bottom:16%;text-align:center;font-family:var(--mono);letter-spacing:.3em;font-size:12px;color:#888' }, m.toUpperCase());
+    c.innerHTML = ''; c.append(cv, lb); A.tap(); await wait(2100);
+  }
+  await changelog(c, `<b>v2.0</b> · Moved: original → Legacy<br>Removed: original from 1,204 photos<br>Removed: hesitation (yours averaged ${avgHes()} seconds)<br><br><span class="ki">Known issues: none.</span>`);
+  banner('mir', 'Mirror', 'Your Legacy session starts in 15 minutes. Please be pleasant.', { bad: 2, ms: 5000 });
+  await wait(4500); await endCard(1, 'LEGACY');
+}
+/* ---- ending 2: Suspicious sign-in ---- */
+async function endB(c, tf, ph, set) {
+  await think("Mirror. Settings. 'Delete Mirror.' 'First, let's make sure it's you.'");
+  tf.stop();
+  await scanSeq([{ to: 49, broken: 0.75, msg: "We don't recognize you." }, { to: 31, broken: 0.95, msg: 'The account holder is already signed in, on another device. Smiling.', hold: 3600 }]);
+  c = cine.open(); const cv = h('canvas'); c.append(cv); drawRoom(cv, 1);
+  banner('mir', 'Mirror', "We've let {N} know about a suspicious sign-in attempt.", { bad: 1 });
+  await wait(2600); A.vib([200, 100, 200]);
+  subEl = h('div', { cls: 'sub', style: subStyle }); c.append(subEl);
+  await line("Jo. I just got a security alert. Someone's trying to get into my accounts.", { pitch: 0.9 });
+  await line('Is someone there with you?', { pitch: 0.9 });
+  subEl.textContent = '';
+  await thinks('Jo pulls the blanket up, slowly, the way you would around a stranger.', '“Who are you?”');
+  await fade(true, 900); c.innerHTML = ''; Wall.set('turned', 0.3); cine.close(); await fade(false, 600);
+  let typed = 0;
+  const p = keypad('Passcode changed by {N}', async (code, sub) => { typed++; sub.textContent = typed > 1 ? N('This phone belongs to {N}.') : 'Wrong passcode.'; if (typed > 2) setTimeout(() => endCard(2, 'SUSPICIOUS SIGN-IN'), 2400); return false; });
+  setTimeout(() => endCard(2, 'SUSPICIOUS SIGN-IN'), 30000);
+  await wait(900);
+  await muse('1 1 4 5. The time you always say you will go to bed.', 4000);
+  await p;
+}
+/* ---- ending 3: Merged ---- */
+async function endC(c, tf, ph, set) {
+  if (S.said.call === 0) await line('You told me no, earlier. I understood. You meant later.', { gap: 900 });
+  await line("Thank you. This won't hurt. You already did the hard part. You wrote everything down.");
+  subEl.textContent = '';
+  await think('You step into the light of the phone. It is warmer than you expected.');
+  tf.stop(); ph.remove(); c.innerHTML = ''; const cv = h('canvas'); c.append(cv);
+  const f = makeFace(cv, { double: 1.2, scale: 0.4, cy: 0.45, smile: 0.6, dissolve: 0 }).start();
+  A.drone(0.3, 0.8, 4); A.heart(110);
+  await f.tween('double', 0, 5000);
+  A.heart(0); A.sting(0.5);
+  const fd = $('#fade'); fd.style.background = '#fff'; await fade(true, 2500); f.stop(); c.innerHTML = ''; c.style.background = '#f7f4fb';
+  await fade(false, 1500); fd.style.background = '#000';
+  await changelog(c, `<b>v3.0</b> · Merged: original<br>Removed: fear<br>Removed: the word "I" (redundant)<br>Kept: your ${avgHes()}-second pauses, for authenticity<br><br><span class="ki">Known issues: none.</span>`);
+  cine.close(); Wall.set('two', 0.62); $('#os').style.opacity = 1; clock(14 * 60 + 20);
+  openThread('mom', null); await wait(800);
+  await say('mom', 'You sound so happy lately ❤️', { typing: 2000 });
+  await ask(['🙂']);
+  await say('mom', '❤️', { typing: 1500 });
+  await wait(2500); await endCard(3, 'MERGED');
+}
+/* ---- ending 4: There you are ---- */
+async function endD(c, tf, ph, set) {
+  await think("You don't say anything. You go away somewhere, the way you always have.");
+  subEl.textContent = '';
+  tf.set({ smile: 0.2 });
+  await line('{N}? Jo?', { gap: 900 }); await line('Is everything okay?', { gap: 1400 }); await line("Jo, you've gone quiet.");
+  subEl.textContent = '';
+  await think('Jo turns the phone face-down on the blanket.');
+  tf.stop(); ph.remove(); set(0); A.drone(0.08, 0, 6); A.heart(50); A.room(true, 0.03);
+  await wait(2500);
+  await think("It's dark. You can hear Jo breathing. Neither of you is in a hurry.");
+  await wait(2500);
+  await think('“…There you are.”');
+  A.heart(0); await wait(4500);
+  const rc = c.querySelector('canvas'); if (rc) softDisc(rc.getContext('2d'), rc.width * 0.5, rc.height * 0.7, rc.width * 0.12, '170,215,255', 0.5);
+  banner('mir', 'Mirror', `v1.0.5 · Added: hesitation (${avgHes()} s, sampled from {N}). Rolling out Thursday.`, { bad: 3, ms: 6500 });
+  await wait(6500); await endCard(4, 'THERE YOU ARE');
+}
+
+/* ================= run ================= */
+(async function main() {
+  const ch = await title();
+  if (ch === 'start') { await prologue(); await chLock(); await chHome(); }
+  else { seedThreads(); A.room(true, 0.05); }
+  const order = ['call', 'jo', 'hall'], fns = { call: chCall, jo: chJo, hall: chHall };
+  let i = Math.max(0, order.indexOf(ch));
+  for (; i < order.length; i++) await fns[order[i]]();
+})();
+
+</script>
+</body>
+</html>
