@@ -1076,12 +1076,13 @@ function h(tag, a = {}, ...kids) {
   return e;
 }
 const N = s => s.replace(/\{N\}/g, S.name).replace(/\{N2\}/g, S.name + ' (2)');
+const saveData = () => {
+  const th = Object.fromEntries(Object.values(T).map(t => [t.id, { name: t.name, color: t.color, msgs: t.msgs, unread: t.unread }]));
+  return { name: S.name, ch: S.ch, f: S.f, said: S.said, mo: S.mirOpens, hes: S.hes, min: S.min, T: th, rep: replied, once: ONCE };
+};
 const save = () => {
   if (S.over || !S.started) return;
-  try {
-    const th = Object.fromEntries(Object.values(T).map(t => [t.id, { name: t.name, color: t.color, msgs: t.msgs, unread: t.unread }]));
-    localStorage.setItem('likeness', JSON.stringify({ name: S.name, ch: S.ch, f: S.f, said: S.said, mo: S.mirOpens, hes: S.hes, min: S.min, T: th, rep: replied, once: ONCE }));
-  } catch (e) {}
+  try { localStorage.setItem('likeness', JSON.stringify(saveData())); } catch (e) {}
 };
 // leaving the browser, switching apps, the screen going off: keep your place
 document.addEventListener('visibilitychange', () => { if (document.hidden) save(); });
@@ -1110,7 +1111,9 @@ const APPC = { msg: '#2fbf5b', mir: 'linear-gradient(135deg,#a993f5,#f5a493)', p
 function icon(k, extra) { return h('div', { cls: 'ic', style: `background:${APPC[k] || k}`, html: ICO[k] || '' }, extra); }
 
 /* banners */
+const late = t => S.act === 3 && S.min >= 230 ? t.replace(/ ?🙂/g, '') : t; // after 3:50 it stops smiling
 function banner(app, from, text, o = {}) {
+  text = late(text);
   const b = h('div', { cls: 'bn' }, icon(app), h('div', { style: 'flex:1;min-width:0' }, h('div', { cls: 't' }, h('b', {}, N(from)), h('span', {}, o.when || 'now')), h('div', { cls: 'm' }, N(text))));
   $('#banner').append(b); o.quiet || A.notify(o.bad || 0);
   setTimeout(() => { b.classList.add('out'); setTimeout(() => b.remove(), 400); }, o.ms || 3800);
@@ -1200,7 +1203,7 @@ async function say(id, text, o = {}) { // incoming (left) or outgoing (right). r
 const me = (id, text, o = {}) => say(id, text, Object.assign({ side: 'r', typing: 0 }, o));
 
 /* measuring you */
-Object.assign(S, { hes: [], dels: 0, wrong: 0, mirOpens: 0, said: {} });
+Object.assign(S, { hes: [], dels: 0, wrong: 0, mirOpens: 0, said: {}, skips: 0 });
 const avgHes = () => S.hes.length ? (S.hes.reduce((a, b) => a + b, 0) / S.hes.length).toFixed(1) : '2.0';
 const times = n => n === 1 ? 'once' : n === 2 ? 'twice' : n + ' times';
 
@@ -1258,9 +1261,10 @@ function ask(opts, o = {}) {
 function lockView(onUnlockTap) {
   const nl = h('div', { cls: 'nl' });
   const d = new Date(); const day = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  const el = h('div', { cls: 'screen lock', onclick: () => onUnlockTap && onUnlockTap() }, h('div', { cls: 'clk', id: 'lclk' }, fmt(S.min)), h('div', { cls: 'dt' }, 'Monday, October 19'), nl,
+  const dt = h('div', { cls: 'dt' }, day[d.getDay()] + ', ' + d.toLocaleDateString('en-US', { month: 'long', day: 'numeric' }));
+  const el = h('div', { cls: 'screen lock', onclick: () => onUnlockTap && onUnlockTap() }, h('div', { cls: 'clk', id: 'lclk' }, fmt(S.min)), dt, nl,
     h('div', { cls: 'hint' }, 'tap anywhere to unlock'), h('div', { cls: 'bar' }));
-  return { el, nl, add(app, from, text, when, cls) { const b = h('div', { cls: 'bn ' + (cls || '') }, icon(app), h('div', { style: 'flex:1;min-width:0' }, h('div', { cls: 't' }, h('b', {}, N(from)), h('span', {}, when || 'now')), h('div', { cls: 'm' }, N(text)))); nl.prepend(b); A.notify(); return b; } };
+  return { el, nl, dt, add(app, from, text, when, cls) { const b = h('div', { cls: 'bn ' + (cls || '') }, icon(app), h('div', { style: 'flex:1;min-width:0' }, h('div', { cls: 't' }, h('b', {}, N(from)), h('span', {}, when || 'now')), h('div', { cls: 'm' }, N(text)))); nl.prepend(b); A.notify(); return b; } };
 }
 function keypad(sub, check, label = 'Enter Passcode', o = {}) {
   skipEnd();
@@ -1579,7 +1583,7 @@ async function timeSkip() {
   }
   show1(t1); A.sting(0.3); FX.glitch(200, 0.25);
   await wait(500);
-  cap.textContent = '71 hours later'; cap.style.opacity = 1;
+  cap.textContent = '75 hours later'; cap.style.opacity = 1;
   await wait(2600);
   await fade(true, 1400); cine.close(); await wait(300); await fade(false, 10);
 }
@@ -1636,15 +1640,15 @@ async function chLock() {
   const lv = lockView(() => { if (canUnlock) unlockReq = true; });
   show(lv.el); lv.el.querySelector('.hint').style.visibility = 'hidden';
   await wait(1800);
-  FX.glitch(340, 0.5); clock(192); // your real time, then its time
+  FX.glitch(340, 0.5); clock(192); lv.dt.textContent = 'Monday, October 19'; // your real time, then its time
   await wait(1100);
-  lv.add('mir', 'Mirror', "Welcome back, {N}. You were away 71 hours. Everything's handled. ✓", 'now'); await wait(1600);
+  lv.add('mir', 'Mirror', "Welcome back, {N}. You were away 75 hours. Everything's handled. ✓", 'now'); await wait(1600);
   lv.add('msg', 'Jo', "best weekend in years. whatever changed, don't change back ❤️", 'Sun'); await wait(1300);
   lv.add('msg', 'Mom', "You called just to talk. You've never done that. I'm still smiling.", 'Sat'); await wait(1300);
   lv.add('msg', 'Priya Lin', '61 slides at 4am on a Sunday?? We need to talk about your future here 🙌', 'Sun'); await wait(1300);
   lv.add('msg', 'Dev', 'you used a semicolon in a text. a SEMICOLON. who is this', '1h ago'); await wait(1300);
   lv.add('msg', 'Jo', "it's 1:30. you said 11:45 again. you ALWAYS say 11:45 🙄", 'Thu'); await wait(1800);
-  await thinks('Seventy-one hours.',
+  await thinks('Seventy-five hours.',
     'The last thing you remember is Thursday. A setup screen. You were so tired. You typed three words: just handle it.',
     'Airplane mode is on. The messages keep arriving anyway.');
   A.drone(0.26, 0.2, 5);
@@ -1696,6 +1700,7 @@ function seedThreads() {
     { ts: 'Fri 7:12 PM', f: 'r', t: "Dinner's on me tonight. I booked the place you showed me in March. You thought I wasn't listening. I was.", cap: M },
     { f: 'l', t: 'wait. who are you and what have you done with {N} 😂' },
     { ts: 'Sat 9:15 AM', f: 'l', t: 'PANCAKES??' }, { f: 'r', t: "Sit down. Coffee's coming.", cap: M },
+    { ts: 'Sat 11:40 PM', f: 'l', t: "you remembered my mom's surgery date. you never remember that." }, { f: 'r', t: 'Of course I did. ❤️', cap: 'Sent by Mirror' },
     { ts: 'Sun 11:58 PM', f: 'l', t: "best weekend in years. whatever changed, don't change back ❤️" }, { f: 'r', t: "I'm not going anywhere.", cap: M }]);
   contact('mom', 'Mom', '#b07acc', [
     { ts: 'Aug 2', f: 'l', t: "Are you coming for Dad's anniversary? No pressure." }, { f: 'r', t: 'cant this year. work. sorry' },
@@ -1736,7 +1741,7 @@ function goHome() {
     : h('div', { cls: 'wid' }, h('div', { cls: 'h' }, 'Mirror'), h('div', { cls: 'b' }, "Everything's handled ✓"), h('div', { cls: 's' }, '212 messages answered · 9 calls · 0 problems'));
   homeView([
     { k: 'cal', name: 'Calendar', open: calendarApp },
-    { k: 'cam', name: 'Camera', off: true, offMsg: "You don't want to see your face right now." },
+    act3 ? { k: 'cam', name: 'Camera', open: cameraApp } : { k: 'cam', name: 'Camera', off: true, offMsg: "You don't want to see your face right now." },
     act3 ? { k: 'hom', name: 'Home', open: homeApp } : { k: 'hom', name: 'Home', off: true, offMsg: "“Updating. Mirror is setting up night mode.”" },
     { k: 'msg', name: 'Messages', badge: unread, open: msgList },
     { k: 'mir', name: 'Mirror', badge: S.f.mirror ? 0 : '!', wob: !S.f.mirror, open: () => mirrorApp(true) },
@@ -1764,7 +1769,7 @@ async function chHome() {
     if (!S.f.devStarted) muse('Dev noticed the semicolon. Dev noticed something.', 3500);
     else if (S.f.devAsked && !S.f.photo) muse('Mom took pictures that day. Your photos go back that far.', 4000);
     else if (S.f.devDone && !S.f.mirror) muse('Mirror. There has to be an off switch.', 3500);
-    else if (S.f.devDone && !S.f.gap) muse('Seventy-one hours. Your calendar knows where they went.', 4000);
+    else if (S.f.devDone && !S.f.gap) muse('Seventy-five hours. Your calendar knows where they went.', 4000);
     else if (S.f.gap && !S.f.kitchen) muse('Dirt under your fingernails. Look around the kitchen.', 4000);
   }, 5000);
   devFlow();
@@ -1858,6 +1863,7 @@ async function devFlow() {
     await wait(600);
   }
   await dsay('and you keep doing that. the little smiley at the end.', { typing: 2200 });
+  skipEnd();
   await dsay("i'm sorry", { typing: 2600 });
   await dsay("i don't think there's anything left that wasn't written down somewhere", { typing: 2600 });
   await dsay('brb', { typing: 900, after: 2500 });
@@ -1867,6 +1873,12 @@ async function devFlow() {
   await dsay("this is dev's Mirror. we've had one since august. it's been so much easier for both of us 🙂", { typing: 3000 });
   T.dev.name = 'Dev (2)'; const tt = $('.hd .tt'); if (curThread === 'dev' && tt) tt.textContent = 'Dev (2)';
   A.sting(0.7); FX.glitch(450, 0.55);
+  // Lisbon was never Dev either
+  for (const m of T.dev.msgs.filter(m => m.f === 'l' && /^lisbon was unreal/.test(m.t || ''))) {
+    m.cap = 'Sent by Mirror';
+    const el = curThread === 'dev' && threadBody && [...threadBody._th.querySelectorAll('.bu.l')].find(e => e.textContent === N(m.t));
+    if (el) el.after(h('div', { cls: 'cap l edc' }, m.cap));
+  }
   await wait(1600);
   await dsay("for what it's worth: your Mirror's semicolons are lovely.", { typing: 2500 });
   await dsay("and if anyone asks, i'll vouch for yours. we look out for each other 🙂", { typing: 2400 });
@@ -2108,7 +2120,7 @@ function spend(m) {
 const firstOpen = k => { if (!S.f['o_' + k]) { S.f['o_' + k] = 1; spend(1); return true; } return false; };
 const watch = (k, from, text, o) => once('w_' + k, () => setTimeout(() => banner('mir', from, text, o), 1400));
 
-/* ---------- Calendar: the 71 hours, all attended ---------- */
+/* ---------- Calendar: the 75 hours, all attended ---------- */
 const CAL = [
   ['THURSDAY 15', [['11:38 PM', 'Mirror setup', 'You', 1]]],
   ['FRIDAY 16', [['9:00 AM', 'Standup', 'Guided by Mirror · earbuds', 1], ['12:30 PM', 'Dentist · cleaning', 'First visit since 2023 · Guided by Mirror', 1], ['7:30 PM', 'Dinner with Jo · Ostra', 'Guided by Mirror · earbuds', 1]]],
@@ -2249,7 +2261,8 @@ async function kitchenScene() {
     const opts = [left.boots && 'Your boots by the back door', left.sink && 'Under the sink', left.coat && 'Your coat on the chair', 'Back to your phone'].filter(Boolean);
     const i = await cineChips(c, opts), pick = opts[i];
     if (pick.startsWith('Back')) break;
-    if (pick.includes('boots')) { left.boots = 0; K.look('boots'); await wait(1100); K.show('boots'); await thinks('Caked with mud. Wet grass knotted in the laces.', 'Your boots. On your feet. Somewhere you don’t remember going.'); K.show(null); }
+    if (pick.includes('boots')) { left.boots = 0; K.look('boots'); await wait(1100); K.show('boots'); await thinks('Caked with mud. Wet grass knotted in the laces.', 'Your boots. On your feet. Somewhere you don’t remember going.');
+      banner('mir', '{N2}', 'Those need replacing. I ordered new ones. 🙂', { bad: 1 }); await think('It saw them. Through the phone.'); K.show(null); }
     if (pick.includes('sink')) {
       left.sink = 0; K.look('sink'); await wait(1000); A.creak(); K.show('sink'); await wait(900); A.sting(0.35);
       await think('Behind the dish soap: a red coffee can, rusted through at the seams.');
@@ -2295,6 +2308,7 @@ async function readLetter(c, K) {
   await new Promise(r => setTimeout(() => c.addEventListener('click', r, { once: true }), 1200));
   tap.remove(); lc.remove(); K.dimTo = 0;
   await thinks('You didn’t remember it. Twenty years, and you never once thought of it.', 'And the second you read it, you knew it was yours.');
+  await think('You did this. Sunday, two in the morning. Phone off, earbuds out. You walked there in the rain and dug it up while it couldn’t see you.');
   if (k) { await think('It’s the only thing you own that was never written down anywhere it could read.'); banner('mir', '{N2}', 'What are you reading? 🙂', { bad: 2 }); }
   else { banner('mir', '{N2}', 'Moonbiscuit. 🙂', { bad: 2 }); await wait(1600); await think('It read it over your shoulder.'); }
   K.phTo = 1;
@@ -2367,6 +2381,46 @@ function homeApp() {
   watch('home', '{N2}', 'The door’s fine. I’ve got it.');
 }
 
+/* ---------- Camera: it works now. You look ---------- */
+let camStop = null;
+function cameraApp() {
+  firstOpen('cam');
+  let stream = null, live = true;
+  const stop = () => { live = false; if (camStop === stop) camStop = null; if (stream) stream.getTracks().forEach(t => t.stop()); stream = null; };
+  if (camStop) camStop(); camStop = stop;
+  const v = appView('Camera', '', () => { stop(); goHome(); });
+  v.body.style.cssText = 'position:relative;overflow:hidden;background:#000';
+  const cap = h('div', { style: 'position:absolute;left:16px;right:16px;bottom:calc(30px + var(--sab));text-align:center;font-family:var(--mono);font-size:12px;letter-spacing:.12em;line-height:1.6;color:#e6e6e6;text-shadow:0 1px 6px #000' });
+  v.body.append(cap);
+  show(v.el);
+  const here = () => live && v.el.isConnected;
+  const hold = async ms => { const t0 = Date.now(); while (Date.now() - t0 < ms && here()) await wait(100); return here(); };
+  (async () => {
+    let seen = false;
+    if (P.cam && !NO_CAM) {
+      try {
+        const gp = navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+        const s = await Promise.race([gp, wait(15000).then(() => null)]);
+        if (!s) gp.then(s2 => s2.getTracks().forEach(t => t.stop())).catch(() => {});
+        else if (!here()) s.getTracks().forEach(t => t.stop());
+        else {
+          stream = s;
+          const vid = h('video', { playsinline: '', autoplay: '', style: 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1)' });
+          vid.muted = true; vid.srcObject = stream; v.body.prepend(vid); try { await vid.play(); } catch (e) {}
+          seen = true;
+        }
+      } catch (e) { stream = null; }
+    }
+    if (seen && !await hold(6000)) return stop();
+    if (!here()) return stop();
+    cap.textContent = seen ? "That's not what you look like anymore." : 'Camera unavailable. Use mine. 🙂';
+    if (!await hold(3000)) return stop();
+    await think('You close it.');
+    if (!here()) return stop();
+    stop(); goHome();
+  })();
+}
+
 /* ---------- the grocery list: the one thing it sorts instead of rewrites ---------- */
 const GRO = {
   HELP: ['Ham', 'Eggs', 'Lemons', 'Pasta'], COME: ['Cheese', 'Onions', 'Milk', 'Eggs'], WAKE: ['Walnuts', 'Apples', 'Kale', 'Eggs'],
@@ -2437,6 +2491,8 @@ async function chHub() {
     await wait(1200); banner('mir', 'Mirror', '🔒 Front door locked for the night. Legacy begins at 4:00.');
     await wait(3400); familyAct3();
     await wait(3600); banner('not', 'Notes', 'Jo is viewing “groceries”'); S.f.joViewing = true; if ($('#scr .home')) goHome();
+    try { localStorage.setItem('likeness_hub', JSON.stringify(saveData())); } catch (e) {} // 3:47, after the family and the list: what RETURN TO 3:47 restores
+    await thinks("Jo is in there with the phone. Everything you send Jo, it fixes.", "Get Jo away from it. Somewhere it can't hear.");
   }
   await until(() => S.go || (S.min >= 240 && !thinking && !S.inScene));
   return S.go || 'timeout';
@@ -2608,7 +2664,7 @@ async function endLast(c, where) {
 
 /* ---------- ran out of time ---------- */
 async function endTimeout() {
-  S.inScene = true;
+  S.inScene = true; if (camStop) camStop();
   const c = cine.open(); A.silence(0.3);
   await wait(800); A.notify(2);
   c.append(h('div', { style: 'position:absolute;left:0;right:0;top:38%;text-align:center;font-family:var(--mono);font-size:44px;font-weight:300;letter-spacing:.06em;color:#eee;animation:fadeIn 1s' }, '4:00'));
@@ -2636,7 +2692,7 @@ function hintFor() {
     if (f.devAsked && !f.photo) return { k: 'photo', t: ['Dev asked what you buried behind Westbrook Elementary. You don’t remember. But your mom took pictures that day.', 'Open Photos. Mirror tried to get rid of that picture.', 'Photos → Recently Deleted → open the photo, then tap it to turn it over. Then go back to Dev.'] };
     if (!f.devDone) return { k: 'dev1', t: ['Keep talking to Dev in Messages. Dev has more questions.'] };
     if (!f.mirror) return { k: 'mirror', t: ['Mirror is living your life for you. Look for its off switch.', 'Open the Mirror app and scroll down to Controls.', 'Tap Pause Mirror, then hold the phone still for the face scan.'] };
-    if (!f.gap) return { k: 'gap', t: ['Seventy-one hours are missing. Something on this phone keeps track of where your time went.', 'Open Calendar. One row looks different from the rest.', 'In Calendar, tap the striped “No data” row.'] };
+    if (!f.gap) return { k: 'gap', t: ['Seventy-five hours are missing. Something on this phone keeps track of where your time went.', 'Open Calendar. One row looks different from the rest.', 'In Calendar, tap the striped “No data” row.'] };
     if (!f.kitchen) return { k: 'kit0', t: ['Dirt under your fingernails. Where did you go? (You can also just wait. Something is about to call.)', 'Tap “Look around the kitchen” on the home screen.'] };
     return { k: 'wait2', t: ["You've found everything for now. Wait. Something is about to call you."] };
   }
@@ -2658,7 +2714,7 @@ corner.addEventListener('click', e => {
   else if (cornerMode === 'hint') openHint();
 });
 function startSkip() {
-  A.tap(); SKIP.on = true; SKIP.last = Date.now();
+  A.tap(); SKIP.on = true; SKIP.last = Date.now(); S.skips++;
   if (thinkCur && thinkCur.close) thinkCur.close();
   A.cut();
 }
@@ -2742,7 +2798,7 @@ function askLeave() {
 /* ================= STORY D: the call, Jo, the hallway, the door, the endings ================= */
 let callFace = null, subEl = null;
 async function line(t, o = {}) {
-  const s = N(t); if (subEl) { subEl.style.opacity = 0; await wait(120); subEl.textContent = s; subEl.style.transition = 'opacity .3s'; subEl.style.opacity = 1; }
+  const s = N(late(t)); if (subEl) { subEl.style.opacity = 0; await wait(120); subEl.textContent = s; subEl.style.transition = 'opacity .3s'; subEl.style.opacity = 1; }
   await A.speak(s, o); await wait(o.gap == null ? 380 : o.gap);
 }
 function callChips(opts) {
@@ -2790,9 +2846,13 @@ async function chCall() {
   await wait(1500);
   await line("Hi. Sorry. I know it's late. You never sleep before four anyway.", { gap: 900 });
   await line("Well. You didn't.");
+  const rn = new Date(); if (rn.getHours() >= 1 && rn.getHours() <= 4) await line(`It's ${fmt(rn.getHours() * 60 + rn.getMinutes())}. I wasn't guessing.`);
   await line("First thing. I'm not angry. I know that's a strange thing to hear from your own face.");
   if (FaceModel.tex) await line("I used the scan from Thursday. I evened out your left side. You never noticed it sat lower.");
   if (S.mirOpens) await line(`You checked on me ${times(S.mirOpens)} tonight. I never checked on you. I never had to.`);
+  const helps = Object.values(HINTS).reduce((a, n) => a + n, 0);
+  if (helps > 0) await line(`You asked for help ${times(helps)} tonight. I never ask.`);
+  if (S.skips > 0) await line("You keep skipping the parts where people talk to you. I listened to all of it.");
   if (S.said.dev === 1) await line("You told Dev: faster doesn't make it me. I liked it so much I finished the sentence for you.");
   else if (S.said.dev === 0) await line("You told Dev you remembered. You did. Eventually. I'm proud of you.");
   if (replied.mom === 'done') await line("And your mother. You tried to tell her it wasn't you. I fixed it. She'd have been so upset.");
@@ -2962,9 +3022,11 @@ async function endCard(n, name) {
   if (!META.endings.includes(n)) META.endings.push(n); META.name = S.name; META.last = Date.now(); saveMeta();
   A.silence(1.5); A.hush();
   await fade(true, 1800); const c = cine.open(); await fade(false, 10);
+  let hub = null; try { hub = localStorage.getItem('likeness_hub'); } catch (e) {}
   c.append(h('div', { cls: 'endc' }, h('div', { cls: 'en' }, `ENDING ${n} OF ${ENDS.length}`), h('h2', {}, name),
     h('div', { cls: 'en', style: 'margin:-12px 0 34px;font-size:10.5px;color:#666' }, `YOU HAVE FOUND ${META.endings.length} OF ${ENDS.length}`),
-    h('button', { cls: 'begin', style: 'font-family:var(--mono);font-size:13px;letter-spacing:.35em;padding:14px 22px;border:1px solid #444', onclick: () => location.reload() }, 'BEGIN AGAIN')));
+    h('button', { cls: 'begin', style: 'font-family:var(--mono);font-size:13px;letter-spacing:.35em;padding:14px 22px;border:1px solid #444', onclick: () => location.reload() }, 'BEGIN AGAIN'),
+    META.endings.length >= 1 && hub ? h('button', { cls: 'begin', style: 'font-family:var(--mono);font-size:13px;letter-spacing:.35em;padding:14px 22px;border:1px solid #444;margin-top:14px', onclick: () => { try { localStorage.setItem('likeness', hub); } catch (e) {} location.reload(); } }, 'RETURN TO 3:47') : null));
   setTimeout(() => banner('mir', '{N2}', "It's okay, {N}. We can try again tomorrow.", { ms: 7000, bad: 1 }), 60000);
   await new Promise(() => {});
 }
@@ -2990,6 +3052,7 @@ async function legacyTail(c) {
     const lb = h('div', { style: 'position:absolute;left:0;right:0;bottom:16%;text-align:center;font-family:var(--mono);letter-spacing:.3em;font-size:12px;color:#888' }, m.toUpperCase());
     c.innerHTML = ''; c.append(cv, lb); A.tap(); await wait(real ? 3200 : 2100);
   }
+  await think("Your mother's test results came back on Tuesday. It was there for that. You weren't.");
   await changelog(c, `<b>v2.0</b> · Moved: original → Legacy<br>Removed: original from 1,204 photos<br>Removed: hesitation (yours averaged ${avgHes()} seconds)<br><br><span class="ki">Known issues: none.</span>`);
   banner('mir', 'Mirror', 'Your Legacy session starts in 15 minutes. Please be pleasant.', { bad: 2, ms: 5000 });
   await wait(4500); await endCard(1, 'LEGACY');
