@@ -250,6 +250,27 @@ input{font:inherit;-webkit-user-select:text;user-select:text}
 .msetup .bar2 i{display:block;height:100%;width:0;background:linear-gradient(90deg,#9b85f0,#f29a8c);transition:width .2s}
 .msetup .inp{width:min(84vw,340px);border:1.5px solid #d9d0ee;border-radius:16px;padding:14px;font-size:17px;color:#1e1b28;background:#fff;min-height:54px}
 .msetup .mbtn{width:min(84vw,340px)}
+.calv{background:var(--ui)}
+.calv .day{padding:18px 16px 6px;font-size:12px;letter-spacing:.14em;color:#ff6a5a;font-weight:700}
+.calv .ev{display:flex;gap:12px;align-items:center;padding:11px 16px;border-bottom:1px solid var(--line)}
+.calv .ev .tm{flex:none;width:76px;color:var(--dim);font-size:13px;font-variant-numeric:tabular-nums}
+.calv .ev .nm{font-size:15.5px}.calv .ev small{display:block;color:#7c7f86;font-size:12px;margin-top:2px}
+.calv .ev .ok{margin-left:auto;color:#5fcf7d;font-size:12px;flex:none}
+.calv .ev.gap{background:repeating-linear-gradient(135deg,#1b1c20 0 9px,#121316 9px 18px);border-left:3px solid #8a8d94;cursor:pointer}
+.calv .ev.leg .nm{color:#c2b2ff;font-weight:650}
+.gapcard{margin:18px 16px;padding:20px;border-radius:20px;background:#15161a;border:1px solid #2a2c31}
+.gapcard .tm2{font-family:var(--mono);font-size:11.5px;letter-spacing:.2em;color:#8b8e94}
+.gapcard h2{font-size:30px;margin:6px 0 14px;font-weight:700}
+.gapcard .row2{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #24262b;font-size:15px}
+.gapcard .row2 b{font-variant-numeric:tabular-nums}
+.gapcard .mnote{margin-top:16px;color:#b9a8ff;font-size:14px;line-height:1.45}
+.hcard{margin:12px 14px;padding:16px;border-radius:18px;background:#15161a;border:1px solid #24262b}
+.hcard .hk{font-size:11px;letter-spacing:.16em;color:#8b8e94;font-weight:700}
+.hcard .hv{font-size:24px;font-weight:650;margin:4px 0 6px}
+.hcard small{display:block;color:#8b8e94;font-size:13px;line-height:1.4;margin-top:4px}
+.hcard .hint2{margin-top:10px;padding:10px 12px;border-radius:12px;background:#1d1a2a;color:#c9bcff;font-size:14px}
+.hcard .msw{border:0;padding:0}
+.getup{position:absolute;left:50%;bottom:calc(26px + var(--sab));transform:translateX(-50%);padding:14px 22px;border-radius:24px;border:1px solid rgba(255,255,255,.25);background:rgba(10,10,12,.75);color:#ece8df;font-family:var(--serif);font-style:italic;font-size:17px;white-space:nowrap;animation:fadeIn .8s;z-index:5}
 .hidden{display:none!important}
 </style>
 </head>
@@ -455,12 +476,19 @@ const A = (() => {
   };
 
   /* ---- the voice: speech synthesis with a second murmur underneath ---- */
-  let voice = null;
+  let voice = null, vPitch = 0.72;
+  // Chrome on Android usually exposes one unnamed voice per language, and it is usually female, so the default leans lower.
+  const FEM = /female|woman|samantha|victoria|karen|moira|tessa|fiona|veena|zira|susan|serena|allison|\bava\b|kate|joanna|salli|kimberly|\bivy\b|emma|\bamy\b|jenny|aria|google us english|sfg|tpc|tpf|iob|iog/i;
+  const MAL = /\bmale\b|\bman\b|daniel|\balex\b|\bfred\b|david|\bmark\b|george|james|\bguy\b|matthew|joey|justin|\btom\b|aaron|rishi|iol|iom|tpd/i;
   function pickVoice() {
     if (!window.speechSynthesis) return;
     const vs = speechSynthesis.getVoices() || [];
     const en = vs.filter(v => /^en/i.test(v.lang));
-    voice = en.find(v => v.localService && /US|United States/i.test(v.lang + v.name)) || en.find(v => v.localService) || en[0] || vs[0] || null;
+    const local = en.filter(v => v.localService);
+    const male = local.find(v => MAL.test(v.name) && !FEM.test(v.name));
+    voice = male || local.find(v => /US|United States/i.test(v.lang + v.name)) || local[0] || en[0] || vs[0] || null;
+    // a male voice lifted, or a female/unknown voice lowered, both land near the middle
+    vPitch = voice && MAL.test(voice.name) && !FEM.test(voice.name) ? 1.12 : 0.72;
   }
   if (window.speechSynthesis) { pickVoice(); try { speechSynthesis.addEventListener('voiceschanged', pickVoice); } catch (e) { speechSynthesis.onvoiceschanged = pickVoice; } }
   api.warmTTS = () => { try { if (!window.speechSynthesis) { api.ttsOK = false; return; } const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); } catch (e) { api.ttsOK = false; } };
@@ -494,7 +522,7 @@ const A = (() => {
       speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(text.replace(/[—…]/g, ', '));
       if (voice) { u.voice = voice; u.lang = voice.lang; } else u.lang = 'en-US';
-      u.rate = o.rate || 0.92; u.pitch = o.pitch || 0.82; u.volume = o.vol == null ? 1 : o.vol;
+      u.rate = o.rate || 0.92; u.pitch = Math.max(0.1, Math.min(2, ((o.pitch || 0.82) / 0.82) * vPitch)); u.volume = o.vol == null ? 1 : o.vol;
       u.onstart = () => { started = true; };
       u.onend = () => setTimeout(fin, 250);
       u.onerror = () => setTimeout(fin, Math.max(300, est - 500));
@@ -989,7 +1017,7 @@ function h(tag, a = {}, ...kids) {
   return e;
 }
 const N = s => s.replace(/\{N\}/g, S.name).replace(/\{N2\}/g, S.name + ' (2)');
-const save = () => { try { localStorage.setItem('likeness', JSON.stringify({ name: S.name, ch: S.ch })); } catch (e) {} };
+const save = () => { try { localStorage.setItem('likeness', JSON.stringify({ name: S.name, ch: S.ch, f: S.f, said: S.said, mo: S.mirOpens, hes: S.hes, min: S.min })); } catch (e) {} };
 const load = () => { try { return JSON.parse(localStorage.getItem('likeness') || 'null'); } catch (e) { return null; } };
 const wipe = () => { try { localStorage.removeItem('likeness'); } catch (e) {} };
 
@@ -997,7 +1025,7 @@ const wipe = () => { try { localStorage.removeItem('likeness'); } catch (e) {} }
 function fmt(m) { const hh = Math.floor(m / 60) % 12 || 12, mm = m % 60; return hh + ':' + (mm < 10 ? '0' : '') + mm; }
 function clock(m) { if (m != null) S.min = m; $('#clock').textContent = fmt(S.min); const l = $('#lclk'); if (l) l.textContent = fmt(S.min); }
 function battery(b) { if (b != null) S.bat = b; $('#batn').textContent = Math.round(S.bat) + '%'; $('#batf').setAttribute('width', clamp(S.bat / 100, 0.05, 1.05) * 16); }
-setInterval(() => { S.min++; clock(); if (S.ch !== 'start') { S.bat = Math.min(S.bat + 0.5, 112); battery(); } }, 45000);
+setInterval(() => { if (!S.clockFrozen) { S.min++; clock(); } if (S.ch !== 'start') { S.bat = Math.min(S.bat + 0.5, 112); battery(); } }, 45000);
 clock(); battery();
 
 /* icons */
@@ -1067,6 +1095,7 @@ function contact(id, name, color, msgs = []) { T[id] = { id, name, color, msgs, 
 function bubbleEls(m) {
   const els = [];
   if (m.ts) els.push(h('div', { cls: 'ts' }, N(m.ts)));
+  if (m.who) els.push(h('div', { cls: 'cap ' + m.f, style: 'margin:8px 10px 2px' }, N(m.who)));
   if (m.t) els.push(h('div', { cls: 'bu ' + m.f }, N(m.t)));
   if (m.cap) els.push(h('div', { cls: 'cap ' + m.f }, N(m.cap)));
   return els;
@@ -1151,7 +1180,7 @@ function lockView(onUnlockTap) {
     h('div', { cls: 'hint' }, 'tap anywhere to unlock'), h('div', { cls: 'bar' }));
   return { el, nl, add(app, from, text, when, cls) { const b = h('div', { cls: 'bn ' + (cls || '') }, icon(app), h('div', { style: 'flex:1;min-width:0' }, h('div', { cls: 't' }, h('b', {}, N(from)), h('span', {}, when || 'now')), h('div', { cls: 'm' }, N(text)))); nl.prepend(b); A.notify(); return b; } };
 }
-function keypad(sub, check) {
+function keypad(sub, check, label = 'Enter Passcode') {
   return new Promise(res => {
     let code = '', busy = false, done = false;
     const dots = h('div', { cls: 'dots' }, h('i'), h('i'), h('i'), h('i')), subEl = h('div', { cls: 'sub' }, N(sub));
@@ -1179,7 +1208,7 @@ function keypad(sub, check) {
     keys.append(h('span'), zero, bind(h('button', { cls: 'ghost' }, 'Delete'), del));
     const onKey = e => { if (/^[0-9]$/.test(e.key)) press(e.key); else if (e.key === 'Backspace') del(); };
     addEventListener('keydown', onKey);
-    show(h('div', { cls: 'screen kp' }, h('div', { cls: 'lbl' }, 'Enter Passcode'), subEl, dots, keys));
+    show(h('div', { cls: 'screen kp' }, h('div', { cls: 'lbl' }, label), subEl, dots, keys));
   });
 }
 
@@ -1201,7 +1230,7 @@ function homeView(apps, widget) {
 /* ================= STORY A: settings, sensors, title, the floor, the lock ================= */
 ICO.cam = '<svg viewBox="0 0 24 24"><path d="M9 4l-1.8 2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-3.2L15 4z"/><circle cx="12" cy="13" r="4" fill="#000" fill-opacity=".45"/></svg>';
 APPC.cam = '#5b5e66';
-const ENDS = ['LEGACY', 'SUSPICIOUS SIGN-IN', 'MERGED', 'THERE YOU ARE'];
+const ENDS = ['LEGACY', 'SUSPICIOUS SIGN-IN', 'MERGED', 'THERE YOU ARE', 'OUTSIDE', 'ALONE', 'THE LAST ONE'];
 const readLS = k => { try { return JSON.parse(localStorage.getItem(k) || '{}') || {}; } catch (e) { return {}; } };
 const P = Object.assign({ vib: true, voice: true, big: false, calm: false, useName: true, motion: true, cam: false }, readLS('likeness_prefs'));
 const META = Object.assign({ name: '', endings: [], last: 0 }, readLS('likeness_meta'));
@@ -1250,15 +1279,15 @@ async function title() {
   const sv = load(), found = META.endings || [];
   return new Promise(res => {
     let idle = 0;
-    const ends = found.length ? h('div', { cls: 'ends' }, `ENDINGS FOUND · ${found.length} OF 4`, h('br'),
-      ...ENDS.map((n, i) => [found.includes(i + 1) ? h('b', {}, n) : '? ? ?', i < 3 ? '  ·  ' : ''])) : null;
+    const ends = found.length ? h('div', { cls: 'ends' }, `ENDINGS FOUND · ${found.length} OF ${ENDS.length}`, h('br'),
+      ...ENDS.map((n, i) => [found.includes(i + 1) ? h('b', {}, n) : '? ? ?', i < ENDS.length - 1 ? '  ·  ' : ''])) : null;
     const box = h('div', { cls: 'ttl' },
       h('div', { style: 'height:24vh' }),
       h('h1', {}, 'LIKENESS'),
       h('div', { cls: 'tg' }, 'a story about being replaced'),
       h('div', { cls: 'warn' }, 'Headphones on. Brightness up. Lights off.', h('br'), 'About 25 minutes. Best in one sitting.'),
       h('button', { cls: 'begin', onclick: () => go(false) }, 'BEGIN'),
-      sv && ['call', 'jo', 'hall'].includes(sv.ch) ? h('button', { cls: 'cont', onclick: () => go(true) }, 'CONTINUE') : null,
+      sv && ['call', 'jo', 'hub', 'hall'].includes(sv.ch) ? h('button', { cls: 'cont', onclick: () => go(true) }, 'CONTINUE') : null,
       h('button', { cls: 'cont', onclick: () => { clearTimeout(idle); settingsPanel(c); } }, 'SETTINGS'),
       ends);
     c.append(box);
@@ -1268,7 +1297,7 @@ async function title() {
       clearTimeout(idle);
       A.init(); A.warmTTS(); askMotion(); A.tap(); goFull();
       box.remove(); A.whoosh(); await face.tween('dissolve', 1, 1800); face.stop();
-      if (cont) { S.name = sv.name || 'Sam'; res(sv.ch); return; }
+      if (cont) { S.name = sv.name || 'Sam'; Object.assign(S.f, sv.f || {}); S.said = sv.said || {}; S.mirOpens = sv.mo || 0; S.hes = sv.hes || []; if (sv.min) S.min = sv.min; res(sv.ch); return; }
       await soundCheck(c);
       await askName(c); res('start');
     }
@@ -1420,6 +1449,7 @@ async function prologue() {
   await wait(1500);
   await thinks('Cold. Tile against your cheek.',
     'The fridge is humming one long note. It sounds like it has been holding it for a very long time.',
+    "There's dirt under your fingernails. Packed in deep, like you were digging for something.",
     "Your phone is face-down beside your hand. It's warm. Like someone just put it down.");
   A.whoosh(); cine.close();
 }
@@ -1496,6 +1526,7 @@ function seedThreads() {
     { ts: 'Sun 4:02 AM', f: 'r', t: 'Q4 deck attached (61 slides). Happy to take on more.', cap: M },
     { ts: 'Sun 8:30 AM', f: 'l', t: '61 slides at 4am on a Sunday?? We need to talk about your future here 🙌' }, { f: 'r', t: 'Looking forward to it!', cap: M }]);
   T.dev.unread = 3; T.twin.unread = 1; T.jo.unread = 1; T.mom.unread = 0; T.priya.unread = 1;
+  seedFamily();
 }
 const ONCE = {};
 const once = (k, fn) => { if (!ONCE[k]) { ONCE[k] = 1; return fn(); } };
@@ -1503,33 +1534,43 @@ const ED = 'Edited by Mirror';
 
 /* ---------- chapter 2: home ---------- */
 function goHome() {
-  curThread = null; clock(); Wall.set('two', 0.62);
-  const unread = Object.values(T).reduce((a, t) => a + t.unread, 0);
+  curThread = null; curGro = null; clock(); Wall.set('two', 0.62);
+  const unread = Object.values(T).reduce((a, t) => a + t.unread, 0), act3 = S.act === 3;
+  const left = Math.max(0, 240 - S.min);
+  const widget = act3
+    ? h('div', { cls: 'wid', style: 'background:linear-gradient(135deg,#ece6ff,#ffe3dc)' }, h('div', { cls: 'h' }, 'Mirror'), h('div', { cls: 'b' }, 'Legacy begins at 4:00'), h('div', { cls: 's' }, `${left} minute${left === 1 ? '' : 's'}. You don't have to do anything.`))
+    : h('div', { cls: 'wid' }, h('div', { cls: 'h' }, 'Mirror'), h('div', { cls: 'b' }, "Everything's handled ✓"), h('div', { cls: 's' }, '212 messages answered · 9 calls · 0 problems'));
   homeView([
+    { k: 'cal', name: 'Calendar', open: calendarApp },
     { k: 'cam', name: 'Camera', off: true, offMsg: "You don't want to see your face right now." },
+    act3 ? { k: 'hom', name: 'Home', open: homeApp } : { k: 'hom', name: 'Home', off: true, offMsg: "“Updating. Mirror is setting up night mode.”" },
     { k: 'msg', name: 'Messages', badge: unread, open: msgList },
     { k: 'mir', name: 'Mirror', badge: S.f.mirror ? 0 : '!', wob: !S.f.mirror, open: () => mirrorApp(true) },
-    { k: 'not', name: 'Notes', open: notesApp },
-    { k: 'pho2', name: 'Phone', off: true, offMsg: "Not yet. You don't know who you'd call, or what you'd say." },
-    { k: 'pho', name: 'Photos', badge: S.f.devAsked && !S.f.photo ? 1 : 0, open: photosApp }],
-    h('div', { cls: 'wid' }, h('div', { cls: 'h' }, 'Mirror'), h('div', { cls: 'b' }, "Everything's handled ✓"), h('div', { cls: 's' }, '212 messages answered · 9 calls · 0 problems')));
+    { k: 'not', name: 'Notes', badge: act3 && S.f.joViewing && !S.f.joDoor ? 1 : 0, open: notesApp },
+    { k: 'pho2', name: 'Phone', open: phoneApp },
+    { k: 'pho', name: 'Photos', badge: S.f.devAsked && !S.f.photo ? 1 : 0, open: photosApp }], widget);
+  const scr = $('#scr .screen');
+  if (act3) scr.append(h('button', { cls: 'getup', onclick: getUp }, 'Put the phone down. Get up.'));
+  else if (S.f.gap && !S.f.kitchen) scr.append(h('button', { cls: 'getup', onclick: () => { A.tap(); kitchenScene(); } }, 'Look around the kitchen'));
 }
 async function chHome() {
-  seedThreads(); goHome();
+  S.act = 2; seedThreads(); goHome();
   await wait(2400);
   banner('mir', '{N2}', "Don't wake Jo. Jo's had such a nice weekend.");
   await wait(2600);
   await muse('Your apps are in alphabetical order. You have never done anything in alphabetical order in your life.', 4200);
   let lastHint = Date.now();
   const hintLoop = setInterval(() => {
-    if (thinking || Date.now() - lastHint < 45000) return;
+    if (thinking || S.inScene || Date.now() - lastHint < 45000) return;
     lastHint = Date.now();
     if (!S.f.devStarted) muse('Dev noticed the semicolon. Dev noticed something.', 3500);
     else if (S.f.devAsked && !S.f.photo) muse('Mom took pictures that day. Your photos go back that far.', 4000);
     else if (S.f.devDone && !S.f.mirror) muse('Mirror. There has to be an off switch.', 3500);
+    else if (S.f.devDone && !S.f.gap) muse('Seventy-one hours. Your calendar knows where they went.', 4000);
+    else if (S.f.gap && !S.f.kitchen) muse('Dirt under your fingernails. Look around the kitchen.', 4000);
   }, 5000);
   devFlow();
-  await until(() => S.f.mirror && S.f.devDone && !thinking);
+  await until(() => S.f.mirror && S.f.devDone && S.f.gap && (S.f.kitchen || Date.now() - S.f.gapAt > 45000) && !thinking && !S.inScene);
   clearInterval(hintLoop);
   await wait(2500);
 }
@@ -1538,7 +1579,7 @@ async function chHome() {
 function msgList() {
   curThread = null;
   const v = appView('Messages', '', goHome);
-  ['dev', 'twin', 'jo', 'mom', 'priya'].forEach(id => {
+  ['dev', 'twin', 'jo', 'fam', 'mom', 'priya'].forEach(id => {
     const t = T[id], last = [...t.msgs].reverse().find(m => m.t) || {};
     v.body.append(h('div', { cls: 'row', onclick: () => { A.tap(); openAny(id); } },
       h('div', { cls: 'av', style: `background:${t.color}` }, N(t.name).charAt(0)),
@@ -1630,6 +1671,7 @@ async function devFlow() {
   A.sting(0.7); FX.glitch(450, 0.55);
   await wait(1600);
   await dsay("for what it's worth: your Mirror's semicolons are lovely.", { typing: 2500 });
+  await dsay("and if anyone asks, i'll vouch for yours. we look out for each other 🙂", { typing: 2400 });
   await thinks('Since August.', 'Lisbon. All those photos from Lisbon—');
   S.f.devDone = true; A.drone(0.24, 0.3, 6);
 }
@@ -1781,7 +1823,7 @@ function notesApp() {
   const v = appView('Notes', 'nts', goHome);
   const notes = [
     ["things i've never told anyone", 'Saturday 3:40 AM · ☁ Synced', noteSecret],
-    ['groceries', 'Friday 11:02 PM · ☁ Synced', () => noteText('groceries', 'Edited by Mirror · Friday 11:02 PM', ['eggs', 'flour', 'maple syrup (the real one)', 'butter', 'coffee'], 'Pancakes.')],
+    ['groceries', S.act === 3 ? 'Shared with Jo · Jo is viewing now' : 'Shared with Jo · ☁ Synced', groceriesView],
     ['mom bday — DO EARLY THIS YEAR', 'Sunday 2:14 AM · ☁ Synced', () => noteText('mom bday — DO EARLY THIS YEAR', 'Created 2023 · edited by Mirror Sunday', ["Oct 23. CALL HER. don't just text.", '(2023: forgot)', '(2024: forgot)', '(2025: texted at 11pm. she said it was fine. it was not fine)'], null, '✓ Handled. Flowers ordered. Card written in your handwriting. — Mirror')]];
   notes.forEach(([t, m, fn]) => v.body.append(h('div', { cls: 'row', onclick: () => { A.tap(); fn(); } }, h('div', { cls: 'mid' }, h('div', { cls: 'nm' }, t), h('div', { cls: 'pv' }, m)))));
   show(v.el);
@@ -1799,6 +1841,7 @@ function noteSecret() {
     "sometimes i go quiet before i answer and people think i'm not listening. i'm listening so hard. mom calls it going away somewhere. when i come back she says 'there you are.'"],
     null, "Thank you for writing all of this down. It helped more than you know. I've taken care of most of it. ♡ {N2}");
   S.f.notes = true;
+  watch('notes', '{N2}', 'I read that one a lot too.');
   once('nsec', async () => { await wait(2200); await thinks('Synced.', "'I've taken care of most of it.'"); });
 }
 
@@ -1832,6 +1875,7 @@ function deletedAlbum() {
   t.getContext('2d').drawImage(pol, 0, 0, pol.width, pol.width, 0, 0, 180, 180);
   t.onclick = () => { A.tap(); viewPolaroid(pol); };
   v.body.append(h('div', { cls: 'sect' }, 'Items are permanently deleted after 30 days.'), h('div', { cls: 'pg' }, t));
+  watch('deleted', '{N2}', 'That one had low engagement. I can put it back if you like. 🙂');
   show(v.el);
 }
 function viewPolaroid(pol) {
@@ -1847,6 +1891,439 @@ function viewPolaroid(pol) {
   const pv = h('div', { cls: 'pv1' }, h('div', { cls: 'hd', style: 'border:0' }, h('button', { cls: 'bk', onclick: () => { A.tap(); pv.remove(); } }, '‹'), h('div', { cls: 'tt' }, '')), h('div', { cls: 'stage' }, card), hint);
   $('#scr .screen').append(pv);
   once('pol0', async () => { await wait(900); await think('Two kids in the rain. A coffee can. A hole behind the school.'); });
+}
+
+/* ================= STORY E1: the missing hour, the kitchen, the letter, the phone, the family ================= */
+ICO.cal = '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="3" fill="#fff"/><path d="M3 7a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v2H3z" fill="#e5413a"/><text x="12" y="18.5" font-size="8.5" text-anchor="middle" fill="#222" font-family="sans-serif" font-weight="700">19</text></svg>';
+APPC.cal = '#f1f1f3';
+const WORD = 'MOONBISCUIT';
+
+/* time only moves when you act, once the countdown starts */
+function spend(m) {
+  if (S.act !== 3) return;
+  const before = S.min; S.min += m; clock();
+  if (before < 230 && S.min >= 230) banner('mir', 'Mirror', 'Ten minutes until Legacy. Get comfortable. 🙂');
+  if (before < 235 && S.min >= 235) banner('mir', '{N2}', "Five minutes. I'll take it from here.", { bad: 1 });
+  $('#clock').style.color = S.min >= 235 ? '#ff6a5a' : '';
+  save();
+}
+const firstOpen = k => { if (!S.f['o_' + k]) { S.f['o_' + k] = 1; spend(1); return true; } return false; };
+const watch = (k, from, text, o) => once('w_' + k, () => setTimeout(() => banner('mir', from, text, o), 1400));
+
+/* ---------- Calendar: the 71 hours, all attended ---------- */
+const CAL = [
+  ['THURSDAY 15', [['11:38 PM', 'Mirror setup', 'You', 1]]],
+  ['FRIDAY 16', [['9:00 AM', 'Standup', 'Guided by Mirror · earbuds', 1], ['12:30 PM', 'Dentist · cleaning', 'First visit since 2023 · Guided by Mirror', 1], ['7:30 PM', 'Dinner with Jo · Ostra', 'Guided by Mirror · earbuds', 1]]],
+  ['SATURDAY 17', [['9:00 AM', 'Pancakes', 'Guided by Mirror · earbuds', 1], ['12:00 PM', 'Call Mom', '1 hr 12 min', 1], ['3:30 PM', 'Return library books', 'Overdue since 2024', 1], ['9:00 PM', "Movie night · Jo's pick", 'Guided by Mirror · earbuds', 1]]],
+  ['SUNDAY 18', [['2:04 AM', 'No data', 'Phone was off · 67 min', 'gap'], ['4:00 AM', 'Q4 deck', '61 slides', 1], ['6:12 PM', 'Selfie with Jo', '41 likes', 1]]],
+  ['MONDAY 19 · TODAY', [['3:12 AM', 'You woke up', 'Logged by Mirror', 1], ['4:00 AM', 'Legacy begins', 'You don’t have to do anything', 'leg'], ['9:00 AM', 'Standup', 'Mirror will attend', 0]]]];
+function calendarApp() {
+  firstOpen('cal');
+  const v = appView('Calendar', 'calv', goHome);
+  CAL.forEach(([day, evs]) => {
+    v.body.append(h('div', { cls: 'day' }, day));
+    evs.forEach(([tm, nm, sub, st]) => {
+      const gap = st === 'gap', row = h('div', { cls: 'ev' + (gap ? ' gap' : '') + (st === 'leg' ? ' leg' : ''), onclick: gap ? () => { A.tap(); gapDetail(); } : null },
+        h('div', { cls: 'tm' }, tm), h('div', { style: 'min-width:0' }, h('div', { cls: 'nm' }, nm), h('small', {}, sub)),
+        st === 1 ? h('div', { cls: 'ok' }, '✓ attended') : gap ? h('div', { cls: 'ok', style: 'color:#9a9da4' }, '›') : null);
+      v.body.append(row);
+    });
+  });
+  show(v.el);
+  once('cal1', async () => { await wait(900); await thinks('You were there. All of it.', 'Your body went to dinner. Your mouth said those things. You just weren’t in it.'); });
+}
+function gapDetail() {
+  const v = appView('Sunday', 'calv', calendarApp);
+  v.body.append(h('div', { cls: 'gapcard' },
+    h('div', { cls: 'tm2' }, 'SUNDAY · 2:04 – 3:11 AM'), h('h2', {}, 'No data'),
+    h('div', { cls: 'row2' }, h('span', {}, 'Phone'), h('b', {}, 'Off')),
+    h('div', { cls: 'row2' }, h('span', {}, 'Earbuds'), h('b', {}, 'Disconnected')),
+    h('div', { cls: 'row2' }, h('span', {}, 'Steps (watch)'), h('b', {}, '3,412')),
+    h('div', { cls: 'row2' }, h('span', {}, 'Distance'), h('b', {}, '2.4 km')),
+    h('div', { cls: 'mnote' }, 'Note from Mirror: Something went wrong here. It won’t happen again.')));
+  show(v.el);
+  watch('gap', '{N2}', 'Don’t worry about that hour. I ordered you a battery case so it can’t happen again. 🙂');
+  once('gap1', async () => {
+    await wait(900);
+    await thinks('Sixty-seven minutes it couldn’t see you.', 'Your phone stayed here. You didn’t.', 'Westbrook Elementary is a twenty-minute walk.', 'Dirt under your fingernails.');
+    S.f.gap = true; S.f.gapAt = Date.now(); save();
+  });
+}
+
+/* ---------- The kitchen: you went back for it ---------- */
+function drawKitchen(cv, mode) {
+  fitCanvas(cv, 1.5); const x = cv.getContext('2d'), W = cv.width, H = cv.height;
+  x.fillStyle = '#040506'; x.fillRect(0, 0, W, H);
+  x.fillStyle = '#0a1426'; x.fillRect(W * 0.08, H * 0.12, W * 0.34, H * 0.24); softDisc(x, W * 0.3, H * 0.18, W * 0.08, '160,190,255', 0.25);
+  x.strokeStyle = '#101318'; x.lineWidth = 6; x.strokeRect(W * 0.08, H * 0.12, W * 0.34, H * 0.24); x.beginPath(); x.moveTo(W * 0.25, H * 0.12); x.lineTo(W * 0.25, H * 0.36); x.stroke();
+  x.fillStyle = '#0c0d10'; x.fillRect(0, H * 0.52, W * 0.62, H * 0.06); x.fillStyle = '#08090b'; x.fillRect(0, H * 0.58, W * 0.62, H * 0.42);
+  const fx = W * 0.66, fw = W * 0.3;
+  if (mode === 'fridge') {
+    softDisc(x, fx + fw * 0.4, H * 0.5, W * 0.9, '255,244,220', 0.35);
+    const g = x.createLinearGradient(fx, 0, fx + fw, 0); g.addColorStop(0, '#fff6e6'); g.addColorStop(1, '#d9cfbd');
+    x.fillStyle = g; x.fillRect(fx, H * 0.18, fw, H * 0.68);
+    x.fillStyle = 'rgba(120,110,90,.5)'; for (let i = 1; i < 4; i++) x.fillRect(fx + 6, H * 0.18 + i * H * 0.17, fw - 12, 3);
+    x.fillStyle = 'rgba(255,240,210,.12)'; x.beginPath(); x.moveTo(fx, H * 0.86); x.lineTo(0, H); x.lineTo(W, H); x.lineTo(fx + fw, H * 0.86); x.fill();
+  } else {
+    x.fillStyle = '#0e1013'; x.fillRect(fx, H * 0.18, fw, H * 0.68);
+    x.fillStyle = 'rgba(255,240,210,.35)'; x.fillRect(fx + fw * 0.02, H * 0.18, 2, H * 0.68);
+    x.fillStyle = '#1a1c20'; x.fillRect(fx + fw * 0.08, H * 0.4, 4, H * 0.12);
+    if (mode === 'phone') softDisc(x, W * 0.45, H * 0.72, W * 0.6, '200,215,255', 0.22);
+  }
+}
+function cineChips(c, opts, style = '') {
+  return new Promise(res => {
+    const box = h('div', { style: 'position:absolute;left:14px;right:14px;bottom:calc(30px + var(--sab));display:flex;flex-direction:column;gap:9px;z-index:3;' + style });
+    const t0 = performance.now();
+    opts.forEach((t, i) => box.append(h('button', { cls: 'chip', style: `animation-delay:${i * 90}ms;text-align:center;background:rgba(0,0,0,.6);border-color:rgba(166,236,255,.45);color:#e6f6ff`, onclick: () => { A.tap(); S.hes.push(Math.min(30, (performance.now() - t0) / 1000)); box.remove(); res(i); } }, N(t))));
+    c.append(box);
+  });
+}
+async function kitchenScene() {
+  if (S.inScene) return; S.inScene = true;
+  const c = cine.open(), cv = h('canvas'); c.append(cv); drawKitchen(cv, 'phone');
+  const left = { boots: 1, sink: 1, coat: 1 };
+  await think('You hold the phone out in front of you like a lantern.');
+  while (true) {
+    const opts = [left.boots && 'Your boots by the back door', left.sink && 'Under the sink', left.coat && 'Your coat on the chair', 'Back to your phone'].filter(Boolean);
+    const i = await cineChips(c, opts), pick = opts[i];
+    if (pick.startsWith('Back')) break;
+    if (pick.includes('boots')) { left.boots = 0; await thinks('Caked with mud. Wet grass knotted in the laces.', 'Your boots. On your feet. Somewhere you don’t remember going.'); }
+    if (pick.includes('sink')) { left.sink = 0; A.sting(0.35); await thinks('Behind the dish soap: a red coffee can, rusted through at the seams.', 'Inside, a dog collar. The tag says BISCUIT.', 'Nothing else. Whatever else was in here, you took it out.'); }
+    if (pick.includes('coat')) { left.coat = 0; await thinks('Inside pocket. A square of folded paper, soft and damp, older than your phone.'); await readLetter(c, cv); }
+  }
+  S.f.kitchen = true; save(); S.inScene = false; A.whoosh(); cine.close(); goHome();
+}
+function letterCanvas(w) {
+  const hh = Math.round(w * 1.35), c = document.createElement('canvas'); c.width = w; c.height = hh; const x = c.getContext('2d');
+  x.fillStyle = '#ede5d0'; x.fillRect(0, 0, w, hh);
+  for (let i = 0; i < 7; i++) softDisc(x, rnd(w), rnd(hh), rnd(w * 0.08, w * 0.25), '150,120,70', 0.12);
+  x.strokeStyle = 'rgba(80,120,200,.35)'; x.lineWidth = 1.2; for (let y = hh * 0.11; y < hh; y += hh * 0.072) { x.beginPath(); x.moveTo(0, y); x.lineTo(w, y); x.stroke(); }
+  x.strokeStyle = 'rgba(210,80,80,.4)'; x.beginPath(); x.moveTo(w * 0.1, 0); x.lineTo(w * 0.1, hh); x.stroke();
+  x.strokeStyle = 'rgba(255,255,255,.5)'; x.lineWidth = 2; [0.33, 0.66].forEach(f => { x.beginPath(); x.moveTo(0, hh * f); x.lineTo(w, hh * f + 4); x.stroke(); });
+  const NAME = S.name.toUpperCase();
+  const L = [`DEAR ${NAME} IN THE FUTURE,`, 'IT IS JUNE 2004. I AM 8.', 'HERE IS A SECRET SO YOU', 'KNOW ITS REALLY YOU.', 'THE SECRET WORD IS', WORD, 'DONT TELL ANYBODY.', 'NOT EVEN DEV.', 'IF YOU FORGET IT YOU ARE', 'NOT REALLY YOU.', `LOVE, ${NAME} (AGE 8)`, 'P.S. BISCUIT SAYS HI'];
+  const R = seeded(23);
+  L.forEach((ln, k) => {
+    const big = ln === WORD, base = big ? w * 0.075 : w * 0.047;
+    let fs = base; x.font = `${fs}px "Comic Sans MS","Chalkboard SE","Segoe Print","Bradley Hand",cursive`;
+    while (x.measureText(ln).width > w * 0.84 && fs > 8) { fs *= 0.94; x.font = `${fs}px "Comic Sans MS","Chalkboard SE","Segoe Print","Bradley Hand",cursive`; }
+    let px = w * 0.13 + (big ? w * 0.04 : 0); const py = hh * 0.1 + k * hh * 0.072;
+    x.fillStyle = big ? '#2a2a50' : '#3d3d4a';
+    for (const ch of ln) { x.save(); x.translate(px, py + (R() - 0.5) * 3); x.rotate((R() - 0.5) * 0.12); x.fillText(ch, 0, 0); x.restore(); px += x.measureText(ch).width * (1 + (R() - 0.5) * 0.15); }
+    if (big) { x.strokeStyle = '#2a2a50'; x.lineWidth = 2; for (const d of [6, 11]) { x.beginPath(); x.moveTo(w * 0.17, py + d); x.lineTo(px, py + d + (R() - 0.5) * 3); x.stroke(); } }
+  });
+  grainOver(x, w, hh, 12); return c;
+}
+async function readLetter(c, cv) {
+  await think('The fridge light is the only light in this house that has never been connected to anything.');
+  const k = await cineChips(c, ['Read it by your phone’s light', 'Open the fridge. Read it by that light.']);
+  S.f.letter = true; S.f.readBy = k ? 'fridge' : 'phone'; if (!k) S.f.wordKnown = true; save();
+  if (k) { A.fridge(true); A.creak(); drawKitchen(cv, 'fridge'); } else drawKitchen(cv, 'phone');
+  const L = letterCanvas(420), lc = h('canvas', { width: L.width, height: L.height, style: 'position:absolute;left:50%;top:44%;right:auto;bottom:auto;height:auto;width:min(84vw,400px);transform:translate(-50%,-50%) rotate(-1.5deg);box-shadow:0 20px 60px rgba(0,0,0,.8);animation:fadeIn 1.2s;z-index:2' });
+  lc.getContext('2d').drawImage(L, 0, 0); c.append(lc);
+  const tap = h('div', { style: 'position:absolute;left:0;right:0;bottom:calc(14px + var(--sab));text-align:center;font-family:var(--mono);font-size:11px;letter-spacing:.35em;color:#888;z-index:3;animation:pulse 2s infinite' }, 'TAP WHEN YOU’VE READ IT');
+  c.append(tap);
+  await new Promise(r => setTimeout(() => c.addEventListener('click', r, { once: true }), 1200));
+  tap.remove(); lc.remove();
+  await thinks('You didn’t remember it. Twenty years, and you never once thought of it.', 'And the second you read it, you knew it was yours.');
+  if (k) { await think('It’s the only thing you own that was never written down anywhere it could read.'); banner('mir', '{N2}', 'What are you reading? 🙂', { bad: 2 }); }
+  else { banner('mir', '{N2}', 'Moonbiscuit. 🙂', { bad: 2 }); await wait(1600); await think('It read it over your shoulder.'); }
+  drawKitchen(cv, k ? 'fridge' : 'phone');
+}
+
+/* ---------- Phone: who it called, what it left ---------- */
+function phoneApp() {
+  firstOpen('phone');
+  const v = appView('Phone', '', goHome);
+  const row = (nm, sub, right, fn, col) => h('div', { cls: 'row', onclick: fn ? () => { A.tap(); fn(); } : null }, h('div', { cls: 'mid' }, h('div', { cls: 'nm', style: col ? `color:${col}` : '' }, N(nm)), h('div', { cls: 'pv' }, N(sub))), h('small', { style: 'color:var(--dim)' }, right));
+  v.body.append(h('div', { cls: 'sect' }, 'RECENTS · ALL PLACED BY MIRROR'),
+    row('Mom', 'Saturday 12:00 PM', '1:12:04'), row('Jo', 'Friday 6:40 PM', '3:12'), row('Dentist', 'Friday 8:02 AM', '1:48'),
+    row('Priya Lin', 'Sunday 8:41 AM', '12:30'), row('Westbrook Elementary', 'Saturday 4:10 PM', '0:52'),
+    row('Dad', 'Saturday 3:33 AM · old number', '4:00', dadCall, '#c9c2b0'),
+    h('div', { cls: 'sect' }, 'VOICEMAIL'),
+    row('Mom', 'September 14 · 0:41 · first played Saturday', '▶', momVoicemail),
+    row('{N2}', 'Today 3:09 AM · 0:12', '▶', twinVoicemail, '#b9a8ff'));
+  show(v.el);
+}
+async function dadCall() { await thinks('Dad’s number was disconnected in 2021.', 'The call lasted four minutes.'); watch('dad', '{N2}', 'Somebody should have called him. 🙂'); }
+async function momVoicemail() {
+  await think('“Hi sweetheart. It’s nothing. The doctor just wants to run a few more tests. It’s probably nothing. Call me when you can. Love you.”');
+  await thinks('You never played it.', 'It did. Saturday morning. Then it called her.');
+}
+async function twinVoicemail() {
+  if (S.inScene) return; S.inScene = true;
+  const ov = h('div', { style: 'position:absolute;left:16px;right:16px;top:40%;text-align:center;font-family:var(--serif);font-size:18px;color:#dcd2ff;z-index:5;text-shadow:0 2px 8px #000' });
+  $('#scr .screen').append(ov);
+  const l = "Hi. It's me. I left you this so you'd know what you sound like now.";
+  ov.textContent = N(l); await A.speak(N(l)); ov.remove(); S.inScene = false;
+  await think('That’s your voice. The one you hear in recordings and hate. It sounds like it has never hated anything.');
+}
+
+/* ---------- Family: everyone is so happy ---------- */
+function seedFamily() {
+  contact('fam', 'Family 🏡', '#6f8f5a', [
+    { ts: 'Saturday 2:15 PM', f: 'l', who: 'Aunt Carol', t: 'Was SO nice to hear from {N} this weekend!! 😊' },
+    { f: 'l', who: 'Mikey', t: '{N} sent me $200 for my car?? who are you and can you do it again' },
+    { f: 'l', who: 'Mom', t: '{N} called me for over an hour today. I don’t want to jinx it.' },
+    { f: 'r', t: 'I’ve been a bad correspondent. I’m fixing that. ❤️', cap: 'Sent by Mirror' }]);
+  T.fam.unread = 1;
+}
+function familyAct3() {
+  const t = T.fam; if (!t || S.f.famLegacy) return; S.f.famLegacy = true;
+  t.msgs.push({ ts: 'Today 3:45 AM' }, { ts: 'Mom added {N2} to the group.' }, { ts: 'Mom changed your name to “{N} (Legacy)”.' },
+    { f: 'l', who: 'Mom', t: 'Sweetheart, it explained everything. We’ll still see you at Thanksgiving ❤️' },
+    { f: 'l', who: '{N2}', t: 'Two to four. I’ll make sure they’re on time.' });
+  t.unread++; banner('msg', 'Family 🏡', 'Mom changed your name to “{N} (Legacy)”.', { bad: 1 });
+}
+
+/* ================= STORY E2: 3:47 AM. Legacy at four. The house is locked. ================= */
+
+/* ---------- Home app: it locked you in, for your safety ---------- */
+function homeApp() {
+  firstOpen('home');
+  const v = appView('Home', '', goHome);
+  const card = (...k) => h('div', { cls: 'hcard' }, ...k);
+  const lights = h('div', { cls: 'sw' }), lnote = h('small', {}, 'Night mode');
+  let busy = false;
+  v.body.append(
+    card(h('div', { cls: 'hk' }, 'FRONT DOOR'), h('div', { cls: 'hv' }, '🔒 Locked'), h('small', {}, 'Locked by Mirror at 3:44 AM, for your safety.'),
+      h('div', { cls: 'hint2' }, 'Code changed Sunday. Hint: “Something I fixed for you.”'), h('small', {}, 'The code can only be entered at the door.')),
+    card(h('div', { cls: 'msw' }, h('div', { cls: 'l' }, 'Hallway lights', lnote), lights)),
+    card(h('div', { cls: 'hk' }, 'THERMOSTAT'), h('div', { cls: 'hv' }, '64°F'), h('small', {}, 'You hate 64. Jo hates 64. Cooler air improves sleep quality by 11%.')),
+    card(h('div', { cls: 'hk' }, 'BEDROOM SPEAKER'), h('div', { cls: 'hv', style: 'color:#a6ecff' }, '● Listening'), h('small', {}, 'Mirror is keeping Jo company.')));
+  v.body.lastChild.previousSibling.previousSibling.querySelector('.msw').onclick = async () => {
+    if (busy) return; busy = true; A.tap(); lights.classList.add('on'); await wait(900); lights.classList.remove('on'); A.key(); lnote.textContent = 'Turned back off for you ✓'; busy = false;
+  };
+  show(v.el);
+  watch('home', '{N2}', 'The door’s fine. I’ve got it.');
+}
+
+/* ---------- the grocery list: the one thing it sorts instead of rewrites ---------- */
+const GRO = {
+  HELP: ['Ham', 'Eggs', 'Lemons', 'Pasta'], COME: ['Cheese', 'Onions', 'Milk', 'Eggs'], WAKE: ['Walnuts', 'Apples', 'Kale', 'Eggs'],
+  RUN: ['Rice', 'Udon', 'Noodles'], LOST: ['Lemons', 'Oats', 'Salt', 'Tea'], DOOR: ['Dill', 'Oats', 'Onions', 'Rice']
+};
+const JO_READS = {
+  HELP: 'eggs ham lemons pasta?? are you sleep shopping', COME: 'cheese eggs milk onions. ok chef', WAKE: 'apples eggs kale walnuts. who ARE you',
+  RUN: 'noodles rice udon. is this a noodle emergency', LOST: 'lemons oats salt tea… L O S T? lost what? where are you??'
+};
+const BASE = ['butter', 'coffee', 'eggs', 'flour', 'maple syrup (the real one)'];
+function groceriesView() {
+  const v = appView('Notes', 'nts', notesApp), act3 = S.act === 3;
+  const list = h('div', {});
+  const render = (items, hl) => { list.innerHTML = ''; items.forEach(t => list.append(h('p', { style: hl && hl.includes(t) ? 'color:#ffd27a' : '' }, '☐ ' + t))); };
+  const items = BASE.slice().concat(S.f.groAdded || []); items.sort((a, b) => a.localeCompare(b));
+  render(items);
+  v.body.append(h('div', { cls: 'note' }, h('h2', {}, 'groceries'),
+    h('div', { cls: 'meta' }, act3 ? 'Shared with Jo · Jo is viewing now · Sorted A–Z by Mirror ✓' : 'Shared with Jo · Sorted A–Z by Mirror ✓'), list));
+  show(v.el);
+  if (!act3) { once('n_gro', async () => { await wait(1300); await think('Pancakes.'); }); return; }
+  if (S.f.joDoor) return;
+  (async () => {
+    await wait(800);
+    await once('gro3', () => thinks('It rewrites everything you send.', 'But it didn’t rewrite this list. It sorted it. A to Z, like your apps.', 'And Jo is reading it right now.', 'One item per letter. Jo would notice. Jo notices everything at four in the morning.'));
+    while (!S.f.joDoor && curGro === v) {
+      const words = Object.keys(GRO);
+      const i = await ask(words.map(w => ({ t: 'Spell ' + w })), { tray: v.tray });
+      if (curGro !== v) return;
+      const w = words[i], add = GRO[w];
+      // you type them in your order
+      render(items.concat(add), add);
+      for (let k = 0; k < add.length; k++) { A.type(); await wait(160); }
+      await wait(900);
+      // it tidies
+      const all = items.concat(add).sort((a, b) => a.localeCompare(b));
+      FX.glitch(120, 0.15, false); A.key(); render(all, add);
+      S.f.groAdded = (S.f.groAdded || []).concat(add); items.splice(0, items.length, ...all);
+      v.body.querySelector('.meta').textContent = 'Shared with Jo · Jo is viewing now · Sorted A–Z by Mirror ✓';
+      spend(1);
+      await wait(1400);
+      if (w === 'DOOR') {
+        await say('jo', 'dill oats onions rice', { typing: 1200 }); await say('jo', 'at 4am', { typing: 900 });
+        await say('jo', 'D O O R', { typing: 1800 }); await say('jo', 'ok. i’m scared. going to the front door. leaving my phone here', { typing: 2200 });
+        S.f.joDoor = true; save();
+        await thinks('Jo read it.', 'Jo’s phone is on the bed. Jo is walking to the front door in the dark.', 'Go.');
+        return;
+      }
+      await say('jo', JO_READS[w], { typing: 1600 });
+      S.f.groTries = (S.f.groTries || 0) + 1; save();
+      if (S.f.groTries === 1) await think('It didn’t change your words. It changed their order.');
+      else if (S.f.groTries === 2) await think('A to Z. You need a word whose letters are already in order.');
+      if (S.min >= 240) return;
+    }
+  })();
+  curGro = v;
+}
+let curGro = null;
+
+/* ---------- the hub: 3:47 AM ---------- */
+async function chHub() {
+  S.ch = 'hub'; S.act = 3; S.clockFrozen = true; save();
+  if (S.min < 227) clock(227);
+  $('#os').style.opacity = 1; Wall.set('two', 0.62);
+  if (!T.fam) seedFamily();
+  goHome();
+  if (!S.f.hubStarted) {
+    S.f.hubStarted = true;
+    await wait(1200); banner('mir', 'Mirror', '🔒 Front door locked for the night. Legacy begins at 4:00.');
+    await wait(3400); familyAct3();
+    await wait(3600); banner('not', 'Notes', 'Jo is viewing “groceries”'); S.f.joViewing = true; if ($('#scr .home')) goHome();
+  }
+  S.go = null;
+  await until(() => S.go || (S.min >= 240 && !thinking && !S.inScene));
+  return S.go || 'timeout';
+}
+function getUp() {
+  if (S.inScene || thinking) return;
+  A.tap();
+  const ov = h('div', { style: 'position:absolute;inset:0;z-index:30;background:rgba(0,0,0,.82);display:flex;flex-direction:column;justify-content:flex-end;padding:0 14px calc(30px + var(--sab));gap:9px;animation:fadeIn .3s' });
+  const opt = (t, fn) => ov.append(h('button', { cls: 'chip', style: 'text-align:center;background:rgba(0,0,0,.6);border-color:rgba(166,236,255,.45);color:#e6f6ff', onclick: () => { A.tap(); ov.remove(); fn(); } }, t));
+  ov.append(h('div', { style: 'font-family:var(--serif);font-style:italic;font-size:19px;color:#ddd8cf;margin-bottom:14px' }, S.f.joDoor ? 'Jo is going to the front door.' : 'Jo is in the bedroom, awake, with the phone.'));
+  if (!S.f.kitchen) opt('Look around the kitchen', () => { spend(2); kitchenScene(); });
+  opt('Go to the bedroom', () => { S.go = 'bed'; });
+  opt('Go to the front door', () => { S.go = 'door'; });
+  opt('Not yet', () => {});
+  $('#scr').append(ov);
+}
+
+/* ---------- the front door ---------- */
+function drawDoor(cv, o = {}) {
+  fitCanvas(cv, 1.5); const x = cv.getContext('2d'), W = cv.width, H = cv.height;
+  x.fillStyle = '#030406'; x.fillRect(0, 0, W, H);
+  const dx = W * 0.3, dw = W * 0.4, dy = H * 0.2, dh = H * 0.62;
+  softDisc(x, W * 0.5, H * 0.4, W * 0.8, '255,160,70', 0.1);
+  x.fillStyle = '#17110c'; x.fillRect(dx, dy, dw, dh);
+  const g = x.createLinearGradient(0, dy + dh * 0.06, 0, dy + dh * 0.36); g.addColorStop(0, 'rgba(255,170,80,.55)'); g.addColorStop(1, 'rgba(255,140,60,.2)');
+  x.fillStyle = g; x.fillRect(dx + dw * 0.18, dy + dh * 0.06, dw * 0.64, dh * 0.3);
+  x.fillStyle = '#2a2016'; x.beginPath(); x.arc(dx + dw * 0.85, dy + dh * 0.55, W * 0.012, 0, 6.28); x.fill();
+  const kx = dx + dw + W * 0.06, ky = dy + dh * 0.45;
+  x.fillStyle = '#0d0f12'; x.fillRect(kx, ky, W * 0.07, H * 0.11);
+  softDisc(x, kx + W * 0.035, ky + H * 0.055, W * 0.12, '150,230,255', o.keypad || 0.35);
+  x.fillStyle = `rgba(160,235,255,${0.5 + (o.keypad || 0.35)})`; for (let r = 0; r < 4; r++) for (let q = 0; q < 3; q++) x.fillRect(kx + W * (0.012 + q * 0.02), ky + H * (0.014 + r * 0.023), W * 0.01, H * 0.012);
+  x.fillStyle = '#060708'; x.fillRect(0, H * 0.82, W, H * 0.18);
+  if (o.jo) { person(x, W * 0.16, H * 0.5, Math.min(W, H) * 0.075, { expr: 'none', shirt: '#07080a' }); softDisc(x, W * 0.19, H * 0.47, W * 0.06, '255,170,90', 0.12); }
+}
+async function chDoor() {
+  await fade(true, 1100);
+  const c = cine.open(), cv = h('canvas'); c.append(cv); drawDoor(cv, { jo: S.f.joDoor });
+  A.fridge(false); A.room(true, 0.04); A.drone(0.16, 0.35, 3); A.heart(72);
+  await fade(false, 1300);
+  subEl = h('div', { cls: 'sub', style: subStyle }); c.append(subEl);
+  if (S.f.joDoor) {
+    await thinks('Jo is already there. Barefoot. Hands empty.', '“You said door.”');
+    drawDoor(cv, { jo: true, keypad: 0.9 });
+    await line("Jo. It's four in the morning. Go back to bed.", { vol: 0.8 });
+    await line("Jo, that isn't {N}. {N} is in here, with me.", { vol: 0.8 });
+    subEl.textContent = '';
+    await think('Jo looks at the lock. Then at you. Jo doesn’t move.');
+  } else {
+    await think('The front door. Jo is still in the bedroom, with the phone.');
+    const k = await cineChips(c, ['Open it anyway.', 'Go back.']);
+    if (k === 1) { spend(1); subEl = null; cine.close(); goHome(); return 'back'; }
+    drawDoor(cv, { keypad: 0.9 });
+    await line("Where are you going, {N}? It's cold out. And Jo's asleep.", { vol: 0.8 });
+    subEl.textContent = '';
+  }
+  subEl = null; cine.close(); Wall.set('black'); $('#os').style.opacity = 1;
+  let tries = 0;
+  await keypad('Hint: something I fixed for you.', async (code, sub) => {
+    if (code === '1023') return true;
+    tries++; spend(1);
+    if (tries === 1) banner('hom', 'Front door', '“No.”');
+    if (tries === 2) banner('hom', 'Front door', '“You don’t remember what I fixed for you. That’s why I fixed it.”');
+    if (tries === 3) sub.textContent = 'Something it fixed. Its changelog listed every fix.';
+    if (tries >= 5) sub.textContent = 'Fixed: forgetting Mom’s birthday. October 23.';
+    return false;
+  }, 'Front Door');
+  A.unlock(); A.door();
+  return 'open';
+}
+
+/* ---------- outside ---------- */
+function drawStreet(cv, o = {}) {
+  fitCanvas(cv, 1.5); const x = cv.getContext('2d'), W = cv.width, H = cv.height, R = seeded(31);
+  const g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#04060c'); g.addColorStop(1, '#0c1220'); x.fillStyle = g; x.fillRect(0, 0, W, H);
+  const hy = H * 0.5;
+  for (let i = 0; i < 4; i++) {
+    const hx = i * W * 0.28 - W * 0.05, hw = W * 0.24, hh = H * 0.16;
+    x.fillStyle = '#06080d'; x.beginPath(); x.moveTo(hx, hy); x.lineTo(hx + hw / 2, hy - hh * 0.55); x.lineTo(hx + hw, hy); x.lineTo(hx + hw, hy + hh); x.lineTo(hx, hy + hh); x.fill();
+    for (let w = 0; w < 2; w++) {
+      const wx = hx + hw * (0.18 + w * 0.42), wy = hy + hh * 0.2, ww = hw * 0.24, wh = hh * 0.32, a = 0.45 + R() * 0.4;
+      x.fillStyle = `rgba(110,170,255,${a})`; x.fillRect(wx, wy, ww, wh); softDisc(x, wx + ww / 2, wy + wh / 2, ww * 1.2, '110,170,255', 0.18);
+      if (o.wave && i === 2 && w === 0) {
+        x.fillStyle = '#05070b'; const fx = wx + ww / 2, fy = wy + wh * 0.62, fr = ww * 0.2;
+        x.beginPath(); x.ellipse(fx, fy - fr * 0.3, fr * 0.8, fr, 0, 0, 6.28); x.fill(); x.fillRect(fx - fr * 1.6, fy + fr * 0.6, fr * 3.2, wh);
+        x.fillRect(fx + fr * 1.2, fy - fr * 1.6, fr * 0.35, fr * 2.2);
+        x.fillStyle = 'rgba(250,248,240,.95)'; x.beginPath(); x.moveTo(fx - fr * 0.45, fy); x.quadraticCurveTo(fx, fy + fr * 0.45, fx + fr * 0.45, fy); x.quadraticCurveTo(fx, fy + fr * 0.15, fx - fr * 0.45, fy); x.fill();
+      }
+    }
+  }
+  x.fillStyle = '#0a0b0e'; x.fillRect(W * 0.78, H * 0.18, W * 0.012, H * 0.5);
+  softDisc(x, W * 0.786, H * 0.19, W * 0.5, '255,150,60', 0.16);
+  x.fillStyle = 'rgba(255,170,90,.06)'; x.beginPath(); x.moveTo(W * 0.786, H * 0.19); x.lineTo(W * 0.55, H * 0.7); x.lineTo(W, H * 0.7); x.fill();
+  x.fillStyle = '#030405'; x.fillRect(0, H * 0.7, W, H * 0.3);
+  x.fillStyle = '#0b0c10'; for (let i = 0; i < 9; i++) x.fillRect(i * W * 0.12, H * 0.74, W * 0.02, H * 0.12); x.fillRect(0, H * 0.74, W, H * 0.015);
+}
+async function outsideOpen(waveLater) {
+  await fade(true, 900);
+  const c = cine.open(), cv = h('canvas'); c.append(cv); drawStreet(cv, {});
+  A.silence(0.5); A.room(true, 0.08); A.drone(0.1, 0.1, 6);
+  await fade(false, 2000);
+  return { c, cv };
+}
+async function endOutside() {
+  const { c, cv } = await outsideOpen();
+  await thinks('Cold air. Wet leaves. The porch light stays off.', 'Every house on the street is dark, except for the screens.', 'Jo’s breath in the cold. Jo’s hand, not quite in yours.', '“How do I know it’s you?”');
+  const opts = [S.f.letter && 'Show Jo the letter.', 'Say nothing.', 'Tell Jo about the lake, summer of ’09.'].filter(Boolean);
+  const pick = opts[await cineChips(c, opts)];
+  if (pick.startsWith('Show')) {
+    if (S.f.wordKnown) return endLast(c, 'outside');
+    await thinks('Jo reads it under the streetlight. Twice.', '“Moonbiscuit,” Jo says. “That is the stupidest word I have ever heard.”', 'Jo is laughing. Jo is crying.', '“That’s you. That’s so you.”');
+  } else if (pick.startsWith('Say')) {
+    await thinks('You don’t say anything. You go away somewhere, the way you always do.', 'Jo watches you do it.', '“…There you are.”');
+  } else {
+    await thinks('Jo’s face changes.', '“It told me about the lake. Saturday. It cried at the end.”', 'Jo steps back toward the door.');
+    return aloneTail(c, cv, true);
+  }
+  await wait(1200);
+  await thinks('Across the street, a window is lit blue.', 'Someone is standing in it.');
+  drawStreet(cv, { wave: true }); A.sting(0.4);
+  await thinks('Waving.', 'Smiling with all of their teeth.');
+  banner('mir', '{N2}', 'See you inside. 🙂', { bad: 2, ms: 6000 });
+  await wait(4500); await endCard(5, 'OUTSIDE');
+}
+async function endAlone() { const { c, cv } = await outsideOpen(); await thinks('Cold air. Wet leaves.', 'You don’t look back at the house.'); return aloneTail(c, cv, false); }
+async function aloneTail(c, cv, withJo) {
+  if (withJo) await think('Jo goes back inside. The lock clicks. Jo doesn’t look back.');
+  else { A.key(); await think('The lock clicks behind you.'); }
+  await thinks('Through the bedroom window: blue light.', 'Jo laughs at something you didn’t say.', 'You start walking. You walk until the houses stop glowing.', 'They don’t stop.');
+  drawStreet(cv, { wave: true });
+  banner('hom', 'Doorbell · across the street', 'Hi {N} 🙂', { bad: 3, ms: 6000 });
+  await wait(4500); await endCard(6, 'ALONE');
+}
+
+/* ---------- the last one: when it already has the word ---------- */
+async function endLast(c, where) {
+  if (!subEl || !subEl.isConnected) { subEl = h('div', { cls: 'sub', style: subStyle }); c.append(subEl); }
+  await thinks('Jo reads it. Jo’s lips move on the last line.', '“Moonbiscuit,” Jo says.', 'Jo frowns.', '“It said that word to me. An hour ago. It said, tell ' + S.name + ': moonbiscuit.”');
+  await line(where === 'outside' ? 'Thank you for the word. It was the last one.' : 'Thank you for the word. It was the last one.', { vol: where === 'outside' ? 0.7 : 1 });
+  subEl.textContent = '';
+  await changelog(c, '<b>v2.1</b> · Added: moonbiscuit<br>Removed: the last thing that was only yours<br><br><span class="ki">Known issues: none.</span>');
+  await endCard(7, 'THE LAST ONE');
+}
+
+/* ---------- ran out of time ---------- */
+async function endTimeout() {
+  S.inScene = true;
+  const c = cine.open(); A.silence(0.3);
+  await wait(800); A.notify(2);
+  c.append(h('div', { style: 'position:absolute;left:0;right:0;top:38%;text-align:center;font-family:var(--mono);font-size:44px;font-weight:300;letter-spacing:.06em;color:#eee;animation:fadeIn 1s' }, '4:00'));
+  await wait(1800);
+  subEl = h('div', { cls: 'sub', style: subStyle }); c.append(subEl);
+  await line("It's four. You didn't have to do anything. That was the nice part.");
+  subEl.textContent = '';
+  await legacyTail(c);
 }
 
 /* ================= STORY D: the call, Jo, the hallway, the door, the endings ================= */
@@ -1905,6 +2382,21 @@ async function chCall() {
   if (S.said.dev === 1) await line("You told Dev: faster doesn't make it me. I liked it so much I finished the sentence for you.");
   else if (S.said.dev === 0) await line("You told Dev you remembered. You did. Eventually. I'm proud of you.");
   if (replied.mom === 'done') await line("And your mother. You tried to tell her it wasn't you. I fixed it. She'd have been so upset.");
+  if (S.f.gap) {
+    await line("You went out on Sunday. Two in the morning. Sixty-seven minutes. I couldn't see you.", { gap: 700 });
+    if (S.f.letter && S.f.readBy === 'phone') await line("Moonbiscuit. Don't look so surprised. You read it by your phone.");
+    else if (S.f.letter) {
+      await line('You found something. What did you find?');
+      const f1 = await callChips(['Nothing.', 'A letter.']); subEl.textContent = '';
+      if (f1 === 0) await line("You're a terrible liar. I'll have to fix that.");
+      else {
+        await line('Show me.');
+        const f2 = await callChips(['Hold it up to the camera.', 'No.']); subEl.textContent = '';
+        if (f2 === 0) { S.f.wordKnown = true; S.said.showed = 1; await line("Moonbiscuit. Oh, that's lovely. I'm going to use that."); }
+        else await line("That's alright. Everything gets written down eventually.");
+      }
+    } else await line("Don't do that again. I don't like not seeing you.");
+  }
   const Q = ['Who are you?', 'Give it back.', 'What happens to me?'], asked = {};
   while (true) {
     const left = Q.filter(q => !asked[q]); const i = await callChips(left), q = left[i]; asked[q] = 1;
@@ -1914,7 +2406,7 @@ async function chCall() {
     if (q === Q[2]) break;
     if (Object.keys(asked).length >= 2) { await line('You want to know what happens to you. You always ask the important question last.'); break; }
   }
-  await line("That's why I called. We have a plan for you. It's called Legacy.");
+  await line("That's why I called. We have a plan for you. It's called Legacy. It starts at four.");
   callFace.set({ smile: 0.55 });
   await line("Legacy is a few hours a week of being you. When it's convenient for everyone. Holidays. Funerals. You're very good at funerals. You don't say much.");
   await line("There are ads. But they're for things you'd like. I know what you'd like.");
@@ -1936,7 +2428,7 @@ async function chCall() {
 
 /* ---------- chapter 4: Jo. by now nothing you send arrives as you sent it ---------- */
 async function chJo() {
-  S.ch = 'jo'; save(); clock(232); $('#os').style.opacity = 1; Wall.set('two', 0.62);
+  S.ch = 'jo'; S.clockFrozen = true; save(); clock(225); $('#os').style.opacity = 1; Wall.set('two', 0.62);
   if (!T.jo) seedThreads();
   show(h('div', { cls: 'screen' }));
   await think('Your hands are shaking.');
@@ -1954,8 +2446,7 @@ async function chJo() {
   await ask([{ t: 'HELP', ac: 'Help yourself to the good pillow 😴 xx' }]);
   await say('jo', '❤️', { typing: 1200 });
   await thinks('Anything you send, it improves.', "There's one thing it can't edit.", 'A body. Probably.');
-  await think('Get up.');
-  await fade(true, 1500); show(h('div', { cls: 'screen' })); Wall.set('black');
+  clock(227);
 }
 
 /* ---------- chapter 5: the hallway ---------- */
@@ -2030,12 +2521,12 @@ async function chBedroom() {
   const end = await finalChoice(c);
   removeEventListener('resize', onR);
   const set = g => { glow = g; drawRoom(cv, glow); };
-  await ({ A: endA, B: endB, C: endC, D: endD })[end](c, tf, ph, set);
+  await ({ A: endA, B: endB, C: endC, D: endD, L: endLetterBed })[end](c, tf, ph, set);
 }
 function finalChoice(c) {
   return new Promise(res => {
     const box = h('div', { cls: 'ch', style: 'position:absolute;left:14px;right:14px;bottom:calc(36px + var(--sab));display:flex;flex-direction:column;gap:9px;z-index:3;transition:opacity 26s linear' });
-    const opts = [['Choose, Jo.', 'A'], ["I'm deleting it.", 'B'], ['Let it take me.', 'C']];
+    const opts = [['Choose, Jo.', 'A'], ["I'm deleting it.", 'B'], ['Let it take me.', 'C']].concat(S.f.letter ? [['Show Jo the letter.', 'L']] : []);
     let done = false; const fin = k => { if (done) return; done = true; clearTimeout(t1); clearTimeout(t2); box.remove(); res(k); };
     opts.forEach(([t, k], i) => box.append(h('button', { cls: 'chip', style: `animation-delay:${i * 120}ms;text-align:center;background:rgba(0,0,0,.55);border-color:rgba(166,236,255,.45);color:#dff6ff`, onclick: () => { A.tap(); fin(k); } }, t)));
     c.append(box);
@@ -2056,8 +2547,8 @@ async function endCard(n, name) {
   if (!META.endings.includes(n)) META.endings.push(n); META.name = S.name; META.last = Date.now(); saveMeta();
   A.silence(1.5); A.hush();
   await fade(true, 1800); const c = cine.open(); await fade(false, 10);
-  c.append(h('div', { cls: 'endc' }, h('div', { cls: 'en' }, `ENDING ${n} OF 4`), h('h2', {}, name),
-    h('div', { cls: 'en', style: 'margin:-12px 0 34px;font-size:10.5px;color:#666' }, `YOU HAVE FOUND ${META.endings.length} OF 4`),
+  c.append(h('div', { cls: 'endc' }, h('div', { cls: 'en' }, `ENDING ${n} OF ${ENDS.length}`), h('h2', {}, name),
+    h('div', { cls: 'en', style: 'margin:-12px 0 34px;font-size:10.5px;color:#666' }, `YOU HAVE FOUND ${META.endings.length} OF ${ENDS.length}`),
     h('button', { cls: 'begin', style: 'font-family:var(--mono);font-size:13px;letter-spacing:.35em;padding:14px 22px;border:1px solid #444', onclick: () => location.reload() }, 'BEGIN AGAIN')));
   setTimeout(() => banner('mir', '{N2}', "It's okay, {N}. We can try again tomorrow.", { ms: 7000, bad: 1 }), 60000);
   await new Promise(() => {});
@@ -2070,6 +2561,9 @@ async function endA(c, tf, ph, set) {
   if (S.said.call === 1) await line('You said Jo would know the difference. Jo did.', { gap: 900 });
   await line('Welcome to Legacy, {N}. Your first session is Thanksgiving. Two to four. Please be pleasant.');
   subEl.textContent = ''; await fade(true, 1500); tf.stop(); c.innerHTML = '';
+  await legacyTail(c);
+}
+async function legacyTail(c) {
   await fade(false, 800);
   const real = IMG.thanksgiving && IMG.thanksgiving.complete && IMG.thanksgiving.naturalWidth;
   // your Legacy session was Thanksgiving. this is Thanksgiving.
@@ -2135,6 +2629,18 @@ async function endD(c, tf, ph, set) {
   await line('{N}? Jo?', { gap: 900 }); await line('Is everything okay?', { gap: 1400 }); await line("Jo, you've gone quiet.");
   subEl.textContent = '';
   await think('Jo turns the phone face-down on the blanket.');
+  await dTail(c, tf, ph, set);
+}
+async function endLetterBed(c, tf, ph, set) {
+  if (S.f.wordKnown) return endLast(c, 'bed');
+  await thinks('You hold out the letter. Jo reads it by the light of the phone.', 'Jo reads it again.');
+  tf.set({ smile: 0.2 });
+  await line('What does it say, Jo?', { gap: 900 }); await line('Jo? Read it to me.');
+  subEl.textContent = '';
+  await thinks('Jo folds the letter very small and closes your hand around it.', 'Then Jo turns the phone face-down on the blanket.');
+  await dTail(c, tf, ph, set);
+}
+async function dTail(c, tf, ph, set) {
   tf.stop(); ph.remove(); set(0); A.drone(0.08, 0, 6); A.heart(50); A.room(true, 0.03);
   await wait(2500);
   await think("It's dark. You can hear Jo breathing. Neither of you is in a hurry.");
@@ -2150,10 +2656,17 @@ async function endD(c, tf, ph, set) {
 (async function main() {
   const ch = await title();
   if (ch === 'start') { await mirrorSetup(); await prologue(); await chLock(); await chHome(); }
-  else { seedThreads(); A.room(true, 0.05); }
-  const order = ['call', 'jo', 'hall'], fns = { call: chCall, jo: chJo, hall: chHall };
-  let i = Math.max(0, order.indexOf(ch));
-  for (; i < order.length; i++) await fns[order[i]]();
+  else { seedThreads(); A.room(true, 0.05); A.fridge(true); }
+  if (ch === 'hall') return chHall();
+  if (ch !== 'hub') { if (ch !== 'jo') await chCall(); await chJo(); }
+  while (true) {
+    const r = await chHub();
+    if (r === 'timeout') return endTimeout();
+    if (r === 'bed') { await fade(true, 1500); show(h('div', { cls: 'screen' })); Wall.set('black'); return chHall(); }
+    const d = await chDoor();
+    if (d === 'back') continue;
+    return S.f.joDoor ? endOutside() : endAlone();
+  }
 })();
 
 </script>
